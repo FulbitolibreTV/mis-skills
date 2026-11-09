@@ -36,7 +36,7 @@ Instala las skills y plugins de https://github.com/FulbitolibreTV/mis-skills
 /plugin install skills-video --marketplace FulbitolibreTV/mis-skills
 ```
 
-Eso instala las 10 skills de vídeo de una vez. Los plugins se instalan igual, cambiando el nombre:
+Eso instala las 11 skills de vídeo de una vez. Los plugins se instalan igual, cambiando el nombre:
 
 ```
 /plugin install becario-equipo --marketplace FulbitolibreTV/mis-skills
@@ -80,8 +80,11 @@ Las skills no necesitan comando: se activan solas cuando pides algo que encaja. 
 | `mascota-pixel` | Reels con tu mascota en pixel art que mueve la boca con tu voz | «Reel con mi mascota pixel, aquí va mi audio» |
 | `anuncio-animado` | Anuncios de unos 10 segundos para una app o negocio, estilo motion graphics. Saca MP4 y HTML | «Anuncio animado para mi app de recetas» |
 | `becario-editor` | Monta un editor de vídeo con Claude en tu ordenador (HyperFrames o Remotion, FFmpeg, Whisper). Necesita la app de escritorio | «Instálame el editor de vídeo» |
+| `youtube-agent` | Skill unificada con 11 módulos editoriales: guiones, hooks, títulos, miniaturas, SEO, Shorts, retención, capítulos y auditorías | «Haz un guion y tres títulos para mi vídeo de YouTube» |
 
 Cada skill trae una `GUIA.md` con instalación, un ejemplo para probarla y qué hacer si falla.
+
+**YouTube Agent:** el ZIP `zips/youtube-agent-v1.0.1.zip` es la **skill unificada** para Claude web o app. `zips/youtube-agent-plugin-v1.0.1.zip` es el **plugin** para Claude Code. La carpeta fuente es `skills/youtube-agent/`. El archivo `youtube-agent-skill-main.zip` de la raíz también se actualizó a la versión corregida del plugin. Las herramientas editoriales no publican vídeos ni conectan cuentas automáticamente.
 
 ## Plugins y sus comandos
 
@@ -138,6 +141,7 @@ Tres mods para que te dure más el límite de uso de Claude Code (requiere Claud
 
 - `como-funciona`: basada en código con licencia MIT de Artem Novitckii (ver `LICENSE-claude-animation-skills.txt` en su carpeta).
 - Skills, plugins y guías «becario»: regalo de **El Becario de Murphy IA** ([@elbecariodemurphy.ia](https://www.instagram.com/elbecariodemurphy.ia/)). Los plugins y `anuncio-animado` tienen licencia MIT; el resto indica sus condiciones en su `GUIA.md`.
+- `youtube-agent`: adaptado de [Jake Schincariol / youtube-agent-skill](https://github.com/Jakeschincariol/youtube-agent-skill), licencia MIT. Se conservan los créditos y licencia originales.
 - Remotion (lo usan algunas skills) es gratis para particulares y empresas de hasta 3 personas; las más grandes necesitan licencia (remotion.dev/license).
 
 ---

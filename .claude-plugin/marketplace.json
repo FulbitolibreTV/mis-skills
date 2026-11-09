@@ -1,16 +1,32 @@
 {
   "name": "mis-skills",
-  "owner": { "name": "FulbitolibreTV" },
-  "metadata": { "description": "Mis skills y plugins de Claude en español: vídeos, anuncios y herramientas para programar." },
+  "owner": {
+    "name": "FulbitolibreTV"
+  },
+  "metadata": {
+    "description": "Mis skills y plugins de Claude en español: vídeos, anuncios y herramientas para programar."
+  },
   "plugins": [
-    { "name": "becario-equipo", "source": "./plugins/becario-equipo", "description": "Equipo de programación con método: planifica, programa con pruebas y revisa." },
-    { "name": "becario-kit", "source": "./plugins/becario-kit", "description": "Comando /kit: instala 5 plugins útiles paso a paso." },
-    { "name": "becario-mods", "source": "./plugins/becario-mods", "description": "Mods para gastar menos límite de uso en Claude Code." },
+    {
+      "name": "becario-equipo",
+      "source": "./plugins/becario-equipo",
+      "description": "Equipo de programación con método: planifica, programa con pruebas y revisa."
+    },
+    {
+      "name": "becario-kit",
+      "source": "./plugins/becario-kit",
+      "description": "Comando /kit: instala 5 plugins útiles paso a paso."
+    },
+    {
+      "name": "becario-mods",
+      "source": "./plugins/becario-mods",
+      "description": "Mods para gastar menos límite de uso en Claude Code."
+    },
     {
       "name": "skills-video",
       "source": "./",
       "strict": false,
-      "description": "Skills para crear vídeos: como-funciona, becario-reels, explicador-animado, historia-papel, collage-historia, mascota-cubos, mascota-pixel, anuncio-animado y becario-editor.",
+      "description": "Once skills para vídeos, reels, anuncios y YouTube Agent; edición, guiones, miniaturas, retención y más.",
       "skills": [
         "./skills/como-funciona",
         "./skills/como-funciona-personajes",
@@ -21,7 +37,8 @@
         "./skills/mascota-cubos",
         "./skills/mascota-pixel",
         "./skills/anuncio-animado",
-        "./skills/becario-editor"
+        "./skills/becario-editor",
+        "./skills/youtube-agent"
       ]
     }
   ]
