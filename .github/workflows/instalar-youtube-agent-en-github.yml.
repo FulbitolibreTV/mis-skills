@@ -1,1 +1,70 @@
 
+name: Instalar YouTube Agent
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/instalar-youtube-agent-en-github.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  instalar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extraer e instalar las skills
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          from zipfile import ZipFile
+          import json
+
+          archivo = Path("mis-skills-youtube-agent-integracion.zip")
+          with ZipFile(archivo) as z:
+              if z.testzip():
+                  raise Exception("ZIP dañado")
+
+              for nombre in z.namelist():
+                  ruta = PurePosixPath(nombre)
+                  if ruta.is_absolute() or ".." in ruta.parts:
+                      raise Exception("Ruta insegura")
+
+                  permitidos = (
+                      nombre in (
+                          "README.md",
+                          ".claude-plugin/marketplace.json",
+                          "youtube-agent-skill-main.zip",
+                      )
+                      or nombre.startswith("skills/youtube-agent/")
+                      or nombre.startswith("zips/youtube-agent-")
+                  )
+                  if permitidos and not nombre.endswith("/"):
+                      destino = Path(nombre)
+                      destino.parent.mkdir(parents=True, exist_ok=True)
+                      destino.write_bytes(z.read(nombre))
+
+          datos = json.loads(
+              Path(".claude-plugin/marketplace.json").read_text()
+          )
+          assert any(
+              "./skills/youtube-agent" in p.get("skills", [])
+              for p in datos["plugins"]
+          )
+          PY
+
+      - name: Comprobar funcionamiento
+        run: |
+          python3 -m unittest discover -s skills/youtube-agent/tests -v
+          python3 -m compileall -q skills/youtube-agent
+
+      - name: Guardar cambios en GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md .claude-plugin/marketplace.json skills/youtube-agent zips/youtube-agent-*.zip youtube-agent-skill-main.zip
+          git diff --cached --quiet || (git commit -m "Integrar YouTube Agent" && git push)
