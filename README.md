@@ -1,6 +1,16 @@
 # Mis skills de Claude
 
-Colección de skills y plugins para Claude, en español: vídeos verticales (reels, TikTok, shorts), anuncios animados, editor de vídeo y herramientas para programar con Claude Code.
+Colección de skills y plugins para Claude, en español, para crear contenido más rápido: vídeos verticales (reels, TikTok, shorts), anuncios animados, un editor de vídeo con Claude y herramientas para programar con Claude Code. Instálalas con una frase o dos comandos y empieza a crear.
+
+## Sígueme
+
+Si te sirve este repo, sígueme en mis redes:
+
+- Instagram: [@jossports10](https://www.instagram.com/jossports10)
+- YouTube: [@Factscuriosos19](https://www.youtube.com/@Factscuriosos19)
+- Facebook: [Mi página](https://www.facebook.com/share/1CUAbp5cRo/)
+
+Y si quieres apoyar el repo, dale una ⭐ arriba a la derecha.
 
 ## Qué hay aquí
 
@@ -129,3 +139,7 @@ Tres mods para que te dure más el límite de uso de Claude Code (requiere Claud
 - `como-funciona`: basada en código con licencia MIT de Artem Novitckii (ver `LICENSE-claude-animation-skills.txt` en su carpeta).
 - Skills, plugins y guías «becario»: regalo de **El Becario de Murphy IA** ([@elbecariodemurphy.ia](https://www.instagram.com/elbecariodemurphy.ia/)). Los plugins y `anuncio-animado` tienen licencia MIT; el resto indica sus condiciones en su `GUIA.md`.
 - Remotion (lo usan algunas skills) es gratis para particulares y empresas de hasta 3 personas; las más grandes necesitan licencia (remotion.dev/license).
+
+---
+
+Hecho por mí. ¡Sígueme en [Instagram](https://www.instagram.com/jossports10), [YouTube](https://www.youtube.com/@Factscuriosos19) y [Facebook](https://www.facebook.com/share/1CUAbp5cRo/)!
