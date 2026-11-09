@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "poses": {
+    "robot_base": {
+      "archivo": "nativos/robot_base.png",
+      "ancho": 55,
+      "alto": 96,
+      "boca": {
+        "x": 26,
+        "y": 34,
+        "ancho": 7
+      },
+      "origen": "robot de ejemplo",
+      "fondo": "alfa",
+      "modo": "nativo"
+    },
+    "robot_pulgar": {
+      "archivo": "nativos/robot_pulgar.png",
+      "ancho": 56,
+      "alto": 96,
+      "boca": {
+        "x": 26,
+        "y": 34,
+        "ancho": 7,
+        "buscada": true
+      },
+      "origen": "robot de ejemplo",
+      "fondo": "alfa",
+      "modo": "nativo"
+    },
+    "robot_saluda": {
+      "archivo": "nativos/robot_saluda.png",
+      "ancho": 56,
+      "alto": 96,
+      "boca": {
+        "x": 26,
+        "y": 34,
+        "ancho": 7,
+        "buscada": true
+      },
+      "origen": "robot de ejemplo",
+      "fondo": "alfa",
+      "modo": "nativo"
+    },
+    "robot_senala": {
+      "archivo": "nativos/robot_senala.png",
+      "ancho": 59,
+      "alto": 96,
+      "boca": {
+        "x": 26,
+        "y": 34,
+        "ancho": 7,
+        "buscada": true
+      },
+      "origen": "robot de ejemplo",
+      "fondo": "alfa",
+      "modo": "nativo"
+    }
+  },
+  "pose_inicial": "robot_base"
+}

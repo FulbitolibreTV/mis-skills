@@ -1,0 +1,9 @@
+{
+  "name": "becario-mods",
+  "version": "1.3.0",
+  "description": "Tres mods para gastar menos límite en Claude Code (portero, vigilante y panel) y una skill que revisa cómo usas Claude y te ayuda a crear tus propios mods.",
+  "author": { "name": "El Becario de Murphy IA" },
+  "license": "MIT",
+  "keywords": ["mods", "uso", "limite", "cache", "subagentes", "espanol"],
+  "types": "./types/index.d.ts"
+}

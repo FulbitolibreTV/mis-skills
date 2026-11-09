@@ -1,0 +1,11 @@
+{
+  "name": "becario-kit",
+  "version": "1.0.0",
+  "description": "El comando /kit instala y comprueba paso a paso 5 plugins para Claude Code: Playwright, Frontend Design, MemPalace, Headroom y MODS. Pide permiso antes de cada uno y explica cómo deshacerlo.",
+  "author": {
+    "name": "El Becario de Murphy IA",
+    "url": "https://www.instagram.com/elbecariodemurphy.ia/"
+  },
+  "license": "MIT",
+  "keywords": ["kit", "instalar", "plugins", "playwright", "frontend-design", "mempalace", "headroom", "mods", "espanol"]
+}

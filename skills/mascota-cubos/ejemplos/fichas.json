@@ -1,0 +1,6 @@
+{
+ "chef": {"tipo":"humano","piel":"#E9B58C","pelo":{"color":"#3B2618","estilo":"corto"},"torso":{"color":"#FFFFFF","manga":"larga","dibujo":["........","..R..R..","........","..R..R.."],"leyenda":{"R":"#C8343A"}},"piernas":{"color":"#2B2E3A","largo":true},"zapatos":{"color":"#1B1B20"},"accesorios":["gorro_chef","pajarita:#C8343A"]},
+ "gata": {"tipo":"animal","piel":"#F0A35E","animal":{"orejas":"gato","hocico":"#FFF1E2","nariz":"#E8798A","cola":true,"rayas":"#D07A3A","bigotes":true},"torso":{"color":"#6C5CE7","manga":"corta","capucha":true},"piernas":{"color":"#2E3346","largo":true},"zapatos":{"color":"#FFFFFF","suela":"#6C5CE7"}},
+ "astronauta": {"tipo":"humano","piel":"#C98E66","pelo":{"color":"#1E1A18","estilo":"corto"},"torso":{"color":"#ECEFF4","manga":"larga","dibujo":["......BB","......RR"],"leyenda":{"B":"#2E6BD8","R":"#E23B3B"}},"piernas":{"color":"#ECEFF4","largo":true},"zapatos":{"color":"#9AA3B2","suela":"#5C6577"},"accesorios":["casco"]},
+ "gamer": {"tipo":"humano","piel":"#F2C29A","pelo":{"color":"#8A4FFF","estilo":"largo"},"torso":{"color":"#1E2235","manga":"larga","capucha":true},"piernas":{"color":"#3A4A7A"},"zapatos":{"color":"#FFFFFF","suela":"#8A4FFF"},"accesorios":["auriculares:#8A4FFF","gafas:#1B1B22"]}
+}

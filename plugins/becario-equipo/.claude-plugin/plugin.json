@@ -1,0 +1,11 @@
+{
+  "name": "becario-equipo",
+  "version": "1.3.0",
+  "description": "Un equipo ligero para Claude Code, en español: planifica, programa con pruebas, revisa y apunta lo aprendido. Tres niveles y un revisor de solo lectura.",
+  "author": {
+    "name": "El Becario de Murphy IA",
+    "url": "https://www.instagram.com/elbecariodemurphy.ia/"
+  },
+  "license": "MIT",
+  "keywords": ["equipo", "planificar", "pruebas", "tdd", "revision", "lecciones", "espanol"]
+}

@@ -1,0 +1,36 @@
+{
+  "estilo": "arena",
+  "cabecera": {"derecha": ["robot", "café"]},
+  "personaje": "personaje",
+  "palabras": "voz/palabras.json",
+  "pasos": [
+    {"frase": 1, "personaje": "grande", "pose": "robot_saluda",
+     "titulares": [{"l1": "Café de filtro"}, {"en": "cuatro", "l1": "en 4 pasos"}],
+     "sello": {"en": "cuatro", "valor": "4", "texto": "pasos"}},
+    {"frase": 2, "pose": "robot_senala",
+     "titulares": [{"l1": "Qué necesitas"}],
+     "tarjeta": {"tipo": "iconos", "items": [
+       {"icono": "estrella", "texto": "café", "en": "café"},
+       {"icono": "rayo", "texto": "agua", "en": "agua"},
+       {"icono": "documento", "texto": "filtro", "en": "filtro"}]}},
+    {"frase": 3, "pose": "robot_base",
+     "titulares": [{"l1": "Paso 1", "l2": "Moja el filtro"}],
+     "tarjeta": {"tipo": "lista", "titulo": "Antes de empezar", "items": [{"texto": "Filtro mojado", "en": "moja"}, {"texto": "Agua caliente", "en": "caliente"}]}},
+    {"frase": 4, "pose": "robot_pulgar",
+     "titulares": [{"l1": "Paso 2", "l2": "La medida"}],
+     "tarjeta": {"tipo": "cifra", "valor": "15", "sufijo": " g", "texto": "de café por cada 250 ml", "en": "quince"}},
+    {"frase": 5, "pose": "robot_senala",
+     "titulares": [{"l1": "Paso 3", "l2": "Espera 30 s"}],
+     "tarjeta": {"tipo": "monigote", "cara": "contenta", "icono": "reloj", "bocadillo": "30 segundos", "bocadillo_en": "treinta"}},
+    {"frase": 6, "pose": "robot_base",
+     "titulares": [{"l1": "Paso 4", "l2": "En círculos"}],
+     "tarjeta": {"tipo": "terminal", "titulo": "cafetera", "icono": "reloj", "prompt": "echa el resto del agua", "barra": "Vertiendo", "barra_en": "círculos", "fin": "✓ Despacio", "fin_en": "despacio"}},
+    {"frase": 7, "pose": "robot_pulgar",
+     "titulares": [{"l1": "3 minutos"}, {"en": "cafetería", "l1": "Café", "l2": "de cafetería"}],
+     "tarjeta": {"tipo": "contador", "titulo": "tu taza", "icono": "estrella", "valor": 180, "formato": "puntos", "etiqueta": "segundos de espera", "insignia": "listo"}},
+    {"frase": 8, "pose": "robot_saluda",
+     "titulares": [{"l1": "Sígueme", "l2": "para más"}],
+     "tarjeta": {"tipo": "comentario", "palabra": "CAFE", "texto": "y te paso más trucos"}}
+  ],
+  "portada": {"etiqueta": "TRUCO DE CAFÉ", "l1": "CAFÉ DE FILTRO", "l2": "EN 4 PASOS", "pose": "robot_pulgar", "sello": {"valor": "4", "texto": "pasos"}}
+}

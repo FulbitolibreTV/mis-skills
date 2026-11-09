@@ -1,0 +1,7 @@
+{
+  "name": "becario-kit",
+  "owner": { "name": "El Becario de Murphy IA" },
+  "plugins": [
+    { "name": "becario-mods", "source": "./becario-mods", "description": "Portero, vigilante y panel /consumo para que dure más el límite.", "version": "1.3.0" }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+ "titulo": "El primer bug",
+ "fuentes": ["Smithsonian, Log Book With Computer Bug: https://www.si.edu/object/log-book-computer-bug:nmah_334663"],
+ "decorado": "mesa",
+ "portada": {"titulo": "El primer **bug** era un bicho", "etiqueta": "HISTORIA REAL · 1947"},
+ "frases": [
+  {
+   "texto": "En **1947**, un ordenador gigante de Harvard empezó a **fallar** sin motivo.",
+   "piezas": [
+    {"tipo": "etiqueta", "texto": "Harvard", "x": 540, "y": 190, "tam": 50, "entra": {"t": "@Harvard-0.1", "desde": "pop", "dur": 0.35}},
+    {"tipo": "monitor", "x": 540, "y": 800, "escribe": 2.5, "lineas": 7, "entra": {"t": 0, "desde": "cae", "dur": 0.35}},
+    {"tipo": "teclado", "x": 540, "y": 1290, "entra": {"t": 0.05, "desde": "abajo", "dur": 0.4, "dist": 700}},
+    {"tipo": "brazo", "lado": "izq", "pose": "teclea_a", "x": 410, "y": 1340, "largo": 800, "rot": -5, "pivote": [0, 800], "entra": {"t": 0.2, "desde": "abajo", "dur": 0.45, "dist": 900}},
+    {"tipo": "brazo", "lado": "der", "pose": "teclea_b", "x": 670, "y": 1340, "largo": 800, "rot": 5, "pivote": [0, 800], "entra": {"t": 0.3, "desde": "abajo", "dur": 0.45, "dist": 900}},
+    {"tipo": "sello", "texto": "ERROR", "x": 560, "y": 760, "tam": 110, "rot": -9, "entra": {"t": "@fallar", "desde": "golpe", "dur": 0.22}}
+   ]
+  },
+  {
+   "texto": "Los ingenieros lo revisaron pieza a pieza… y dentro encontraron una **polilla**.",
+   "decorado": "corcho",
+   "camara": "acerca",
+   "piezas": [
+    {"tipo": "nota", "x": 330, "y": 650, "color": "crema", "rot": -5, "texto": "relés", "entra": {"t": 0.1, "desde": "pop", "dur": 0.3}},
+    {"tipo": "nota", "x": 760, "y": 980, "color": "celeste", "rot": 4, "entra": {"t": 0.2, "desde": "pop", "dur": 0.3}},
+    {"tipo": "lupa", "x": -300, "y": 900, "r": 130, "claves": [[0.1, {"x": -300, "y": 900}], ["@pieza", {"x": 330, "y": 700}], ["@dentro", {"x": 640, "y": 830, "curva": "sale"}]]},
+    {"tipo": "polilla", "x": 640, "y": 830, "entra": {"t": "@polilla-0.1", "desde": "golpe", "dur": 0.25}},
+    {"tipo": "brazo", "pose": "senala", "lado": "der", "x": 860, "y": 1420, "largo": 900, "rot": -18, "pivote": [0, 900], "entra": {"t": "@revisaron", "desde": "abajo", "dur": 0.45, "dist": 900}},
+    {"tipo": "taza", "x": 190, "y": 1330, "entra": {"t": "@pieza#2", "desde": "izquierda", "dur": 0.4}}
+   ]
+  },
+  {
+   "texto": "La pegaron en su cuaderno con una nota: **primer caso real de bug**.",
+   "decorado": "escritorio",
+   "piezas": [
+    {"tipo": "hoja", "titulo": "1947", "x": 540, "y": 760, "w": 560, "h": 760, "rot": 2, "vel": 3, "entra": {"t": 0, "desde": "derecha", "dur": 0.4}},
+    {"tipo": "polilla", "x": 600, "y": 820, "aletea": false, "rot": -12, "entra": {"t": "@pegaron", "desde": "cae", "dur": 0.3}},
+    {"tipo": "rect", "w": 200, "h": 46, "color": "#F4EEDF", "x": 600, "y": 820, "rot": 8, "alfa": 0.85, "entra": {"t": "@pegaron+0.25", "desde": "pop", "dur": 0.25}},
+    {"tipo": "brazo", "pose": "sujeta", "lado": "der", "x": 760, "y": 1300, "largo": 700, "rot": 6, "pivote": [0, 700], "entra": {"t": "@nota-0.3", "desde": "abajo", "dur": 0.4, "dist": 900}}
+   ]
+  },
+  {
+   "texto": "Y ese cuaderno se guarda hoy en un **museo** de Washington.",
+   "decorado": "cielo",
+   "barrido": true,
+   "piezas": [
+    {"tipo": "edificio", "x": 540, "y": 1600, "w": 520, "h": 760, "cols": 5, "filas": 6, "luces": 0.4, "entra": {"t": 0, "desde": "abajo", "dur": 0.45, "dist": 800}},
+    {"tipo": "etiqueta", "texto": "Washington", "x": 540, "y": 640, "tam": 50, "rot": -3, "entra": {"t": "@Washington-0.1", "desde": "pop", "dur": 0.35}},
+    {"tipo": "avion", "x": -200, "y": 420, "rot": 8, "claves": [[0.2, {"x": -200, "y": 420}], ["fin", {"x": 1300, "y": 300, "curva": "lineal"}]]}
+   ]
+  }
+ ],
+ "finales": {
+  "instagram": {"texto": "Comenta **BUG** y te cuento más historias así."},
+  "tiktok": {"texto": "Sígueme y escríbeme **BUG** por privado."}
+ }
+}

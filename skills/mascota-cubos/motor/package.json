@@ -1,0 +1,13 @@
+{
+  "name": "mascota-cubos-motor",
+  "version": "1.4.0",
+  "private": true,
+  "description": "Motor de reels con mascota de cubos (Three.js + Chromium sin pantalla + ffmpeg)",
+  "dependencies": {
+    "three": "0.170.0",
+    "playwright-core": "^1.48.0",
+    "@fontsource/poppins": "^5.0.0",
+    "@fontsource/silkscreen": "^5.0.0",
+    "@fontsource/jetbrains-mono": "^5.0.0"
+  }
+}

@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Mono;src:url(node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2)}
+html,body{margin:0;background:#F4EEE6;font-family:Mono}#t{position:absolute;left:0;right:0;font-size:24px;color:#0E1B33;display:grid}
+</style></head><body>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+<script type="module">
+// Hoja de personaje: 4 vistas, 8 poses y las 7 caras. Para enseñar la mascota antes de hacer el reel.
+import * as THREE from 'three';
+import { crearPersonaje } from './personaje.js';
+import { crearMascota } from './fichas/constructor.js';
+import { skinDesdeImagen } from './skin.js';
+const q = new URLSearchParams(location.search);
+const ruta = q.get('plan'); const BASE = ruta.slice(0, ruta.lastIndexOf('/') + 1);
+const plan = await (await fetch(ruta)).json(); const P = plan.personaje || {};
+async function nuevo() {
+  if (P.ficha) return crearMascota(THREE, P.ficha);
+  if (P.skin) return crearPersonaje(THREE, { skin: await skinDesdeImagen(BASE + P.skin), caras: {} });
+  let m; try { m = await import('./' + BASE + P.modulo); } catch { m = await import('./' + P.modulo.replace(/^\.\//, '')); } return m[P.funcion || 'default'](THREE, P);
+}
+const W = 2400, H = 1560;
+const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+r.setSize(W, H); r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; document.body.appendChild(r.domElement);
+const sc = new THREE.Scene();
+sc.add(new THREE.HemisphereLight('#FFFFFF', '#A89878', 1.0));
+const d = new THREE.DirectionalLight('#FFF6EC', 2.1); d.position.set(-0.5, 0.8, 1); sc.add(d);
+const c2 = new THREE.DirectionalLight('#FFFFFF', 0.7); c2.position.set(0.4, 0.6, -1); sc.add(c2);
+const cam = new THREE.OrthographicCamera(0, W, 0, -H, -5000, 5000); cam.position.z = 1000;
+const et = [];
+const pon = async (x, y, alto, giro, pose, cara, txt) => {
+  const p = await nuevo(); p.pose(pose); if (cara) p.cara(cara); p.animar(0.3);
+  p.grupo.scale.setScalar(alto / 33); p.grupo.position.set(x, -y, 0); p.grupo.rotation.set(0.1, giro, 0); sc.add(p.grupo);
+  et.push(`<div style="position:absolute;left:${x - 140}px;width:280px;top:${y + 10}px;text-align:center">${txt}</div>`);
+  return p;
+};
+const vistas = [[0, 'frente'], [0.75, '3/4'], [1.5708, 'lado'], [3.1416, 'espalda']];
+for (let i = 0; i < 4; i++) await pon(170 + i * 270, 640, 470, vistas[i][0], 'base', null, vistas[i][1]);
+const poses = ['saluda', 'presenta', 'pulgar', 'senala_arriba', 'piensa', 'celebra', 'sorpresa', 'agobiado'];
+for (let i = 0; i < 8; i++) await pon(1270 + (i % 4) * 285, 330 + Math.floor(i / 4) * 380, 250, 0.45, poses[i], null, poses[i]);
+const caras = ['feliz', 'sorpresa', 'guino', 'risa', 'agobio', 'piensa', 'decidido'];
+for (let i = 0; i < 7; i++) {
+  const p = await nuevo(); p.pose('base'); p.cara(caras[i]); p.animar(0);
+  const x = 190 + i * 330, y = 1000;
+  p.grupo.scale.setScalar(520 / 33); p.grupo.position.set(x, -(y + 600), 0); p.grupo.rotation.set(0.05, 0.25, 0); sc.add(p.grupo);
+  et.push(`<div style="position:absolute;left:${x - 140}px;width:280px;top:${y - 60}px;text-align:center">${caras[i]}</div>`);
+}
+r.render(sc, cam);
+document.body.insertAdjacentHTML('beforeend', `<div style="position:absolute;inset:0;font-size:24px;color:#0E1B33">${et.join('')}</div>`);
+await document.fonts.ready; window.listo = true;
+</script></body></html>

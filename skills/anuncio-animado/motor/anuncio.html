@@ -1,0 +1,22 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Anuncio</title>
+<style>html,body{margin:0;background:#000}canvas{display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script src="/limpio.js"></script>
+<script src="/anuncio.js"></script>
+<script>
+(async () => {
+  const q = new URLSearchParams(location.search), planUrl = q.get('plan');
+  try {
+    const plan = await (await fetch(planUrl)).json();
+    const fuentes = await (await fetch('/fuentes.json')).json();
+    const base = planUrl.replace(/[^/]*$/, '');
+    const cargar = (src) => new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ko(new Error('imagen')); i.src = base + src; });
+    const A = await Anuncio.iniciar(document.getElementById('c'), plan, fuentes, cargar);
+    window.info = A.info;
+    window.fotograma = (f, calidad) => { A.dibujar(f / A.info.fps); return A.canvas.toDataURL('image/jpeg', calidad || 0.93); };
+    window.png = (t) => { A.dibujar(t); return A.canvas.toDataURL('image/png'); };
+  } catch (e) { window.errorMotor = e.message; }
+  window.listo = true;
+})();
+</script></body></html>

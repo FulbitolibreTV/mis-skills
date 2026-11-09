@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Poppins;font-weight:600;src:url(node_modules/@fontsource/poppins/files/poppins-latin-600-normal.woff2)}
+@font-face{font-family:Poppins;font-weight:800;src:url(node_modules/@fontsource/poppins/files/poppins-latin-800-normal.woff2)}
+@font-face{font-family:Pixel;font-weight:700;src:url(node_modules/@fontsource/silkscreen/files/silkscreen-latin-700-normal.woff2)}
+@font-face{font-family:Mono;font-weight:500;src:url(node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2)}
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#000}
+#escenario{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:Poppins,sans-serif}
+#fondo,#medio,#frente{position:absolute;inset:0;pointer-events:none}
+#fondo{z-index:0}#medio{z-index:1}canvas{position:absolute;inset:0;z-index:2;width:1080px!important;height:1920px!important}#frente{z-index:3}
+.abs{position:absolute}
+</style></head>
+<body><div id="escenario"><div id="fondo"></div><div id="medio"></div><div id="frente"></div></div>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+<script type="module" src="./reel.js"></script>
+</body></html>

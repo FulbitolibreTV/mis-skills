@@ -1,0 +1,97 @@
+{
+  "estilo": "clasico",
+  "salida": "anuncio",
+  "ancho": 1080,
+  "alto": 1920,
+  "fps": 30,
+  "duracion": 9.54,
+  "marca": {
+    "nombre": "Charlo",
+    "eslogan": "Habla desde el primer día",
+    "colores": {
+      "principal": "#6C4CF1",
+      "secundario": "#FF5C8A",
+      "acento": "#FFC93C",
+      "fondo": "#F6F1FF",
+      "texto": "#1C1340",
+      "claro": "#FFFFFF"
+    },
+    "letra_titulos": "Fredoka",
+    "letra_textos": "Poppins"
+  },
+  "mascota": {
+    "forma": "bocadillo",
+    "color": "#6C4CF1",
+    "accesorio": null
+  },
+  "escenas": [
+    {
+      "tipo": "logo",
+      "a": 0,
+      "b": 1.0
+    },
+    {
+      "tipo": "pregunta",
+      "a": 1.0,
+      "b": 2.6,
+      "texto": "¿Hablamos otro idioma?",
+      "resaltar": [
+        "idioma"
+      ],
+      "bocadillo": "¡Hola!"
+    },
+    {
+      "tipo": "palabras",
+      "a": 2.6,
+      "b": 3.4,
+      "palabras": [
+        "Escucha",
+        "Habla"
+      ]
+    },
+    {
+      "tipo": "descubre",
+      "a": 3.4,
+      "b": 4.5,
+      "texto": "Descubre"
+    },
+    {
+      "tipo": "movil",
+      "a": 4.5,
+      "b": 6.4,
+      "chips": [
+        "Pronunciación",
+        "Racha de 7 días"
+      ],
+      "filas": [
+        "Saludar",
+        "Pedir un café",
+        "Presentarte"
+      ],
+      "boton": "Empezar"
+    },
+    {
+      "tipo": "dato",
+      "a": 6.4,
+      "b": 7.4,
+      "numero": 40,
+      "prefijo": "+",
+      "texto": "idiomas para aprender"
+    },
+    {
+      "tipo": "tarjeta",
+      "a": 7.4,
+      "b": 8.2,
+      "titulo": "Lección 3",
+      "subtitulo": "Pedir un café",
+      "progreso": 0.8,
+      "chip": "+20 XP"
+    },
+    {
+      "tipo": "final",
+      "a": 8.2,
+      "b": 9.54,
+      "cta": "Descárgala gratis"
+    }
+  ]
+}

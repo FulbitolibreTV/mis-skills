@@ -1,0 +1,13 @@
+{
+  "name": "anuncio-animado-motor",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Motor de anuncios animados (Canvas 2D + Chromium sin pantalla + ffmpeg)",
+  "license": "MIT",
+  "dependencies": {
+    "@fontsource/fredoka": "^5.0.0",
+    "@fontsource/poppins": "^5.0.0",
+    "@sparticuz/chromium": "^131.0.1",
+    "playwright-core": "1.48.2"
+  }
+}

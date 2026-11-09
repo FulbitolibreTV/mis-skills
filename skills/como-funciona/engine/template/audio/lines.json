@@ -1,0 +1,72 @@
+{
+ "voice": "em_alex",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "text": "¿Por qué el microondas calienta la sopa, pero no el plato?",
+   "start": 0.0,
+   "dur": 2.854
+  },
+  {
+   "i": 1,
+   "text": "Dentro hay una pieza llamada magnetrón.",
+   "start": 3.144,
+   "dur": 2.304
+  },
+  {
+   "i": 2,
+   "text": "Lanza ondas que oscilan dos mil cuatrocientos cincuenta millones de veces por segundo.",
+   "start": 5.587,
+   "dur": 4.668
+  },
+  {
+   "i": 3,
+   "text": "La sopa está llena de agua.",
+   "start": 10.395,
+   "dur": 1.662
+  },
+  {
+   "i": 4,
+   "text": "Y cada molécula de agua tiene un lado positivo y otro negativo.",
+   "start": 12.197,
+   "dur": 3.549
+  },
+  {
+   "i": 5,
+   "text": "Cada vez que la onda cambia, las moléculas giran para seguirla.",
+   "start": 15.886,
+   "dur": 3.403
+  },
+  {
+   "i": 6,
+   "text": "Giran tan rápido que chocan entre ellas, y eso es calor.",
+   "start": 19.429,
+   "dur": 3.03
+  },
+  {
+   "i": 7,
+   "text": "Pero aquí viene lo curioso: el plato de cerámica casi no tiene agua.",
+   "start": 22.599,
+   "dur": 3.754
+  },
+  {
+   "i": 8,
+   "text": "Así que las ondas lo atraviesan sin moverlo.",
+   "start": 26.493,
+   "dur": 2.454
+  },
+  {
+   "i": 9,
+   "text": "Si el plato quema, es porque la sopa le ha pasado su calor.",
+   "start": 29.088,
+   "dur": 3.104
+  },
+  {
+   "i": 10,
+   "text": "Envíaselo a ese amigo que siempre deja la sopa fría por el centro.",
+   "start": 32.332,
+   "dur": 3.742
+  }
+ ]
+}

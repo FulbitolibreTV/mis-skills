@@ -1,0 +1,243 @@
+{
+ "fps": 30,
+ "escala3d": 0.75,
+ "personaje": {
+  "ficha": {
+   "tipo": "humano",
+   "piel": "#E9B58C",
+   "pelo": {
+    "color": "#3B2618",
+    "estilo": "corto"
+   },
+   "torso": {
+    "color": "#FFFFFF",
+    "manga": "larga",
+    "dibujo": [
+     "........",
+     "..R..R..",
+     "........",
+     "..R..R.."
+    ],
+    "leyenda": {
+     "R": "#C8343A"
+    }
+   },
+   "piernas": {
+    "color": "#2B2E3A",
+    "largo": true
+   },
+   "zapatos": {
+    "color": "#1B1B20"
+   },
+   "accesorios": [
+    "gorro_chef",
+    "pajarita:#C8343A"
+   ]
+  }
+ },
+ "colores": {
+  "acento": "#E2483D",
+  "texto": "#1E1A2E",
+  "fondo": "#FFF5EE",
+  "fondo2": "#FCE3D8"
+ },
+ "ejemplos": {
+  "gata": {
+   "tipo": "animal",
+   "piel": "#F0A35E",
+   "animal": {
+    "orejas": "gato",
+    "hocico": "#FFF1E2",
+    "nariz": "#E8798A",
+    "cola": true,
+    "rayas": "#D07A3A",
+    "bigotes": true
+   },
+   "torso": {
+    "color": "#6C5CE7",
+    "manga": "corta",
+    "capucha": true
+   },
+   "piernas": {
+    "color": "#2E3346",
+    "largo": true
+   },
+   "zapatos": {
+    "color": "#FFFFFF",
+    "suela": "#6C5CE7"
+   }
+  },
+  "gamer": {
+   "tipo": "humano",
+   "piel": "#F2C29A",
+   "pelo": {
+    "color": "#8A4FFF",
+    "estilo": "largo"
+   },
+   "torso": {
+    "color": "#1E2235",
+    "manga": "larga",
+    "capucha": true
+   },
+   "piernas": {
+    "color": "#3A4A7A"
+   },
+   "zapatos": {
+    "color": "#FFFFFF",
+    "suela": "#8A4FFF"
+   },
+   "accesorios": [
+    "auriculares:#8A4FFF",
+    "gafas:#1B1B22"
+   ]
+  }
+ },
+ "frases": [
+  {
+   "texto": "¿Tu arroz se pega siempre? Tranquilo, no es culpa tuya.",
+   "claves": [
+    "pega"
+   ],
+   "poses": [
+    "agobiado",
+    "pulgar"
+   ],
+   "escena": {
+    "tipo": "paisaje",
+    "cielo": "dia",
+    "camara": "medio",
+    "objeto": {
+     "tipo": "icono",
+     "icono": "check"
+    }
+   }
+  },
+  {
+   "texto": "Son tres errores muy fáciles de arreglar.",
+   "claves": [
+    "tres"
+   ],
+   "poses": [
+    "presenta"
+   ],
+   "escena": {
+    "tipo": "cortinilla",
+    "texto": "3 errores"
+   }
+  },
+  {
+   "texto": "Primero: lava el arroz hasta que el agua salga clara.",
+   "claves": [
+    "lava"
+   ],
+   "poses": [
+    "senala_arriba"
+   ],
+   "escena": {
+    "tipo": "paso",
+    "n": 1,
+    "total": 3,
+    "titulo": [
+     "lava el",
+     "arroz"
+    ],
+    "clave": "arroz",
+    "tarjeta": {
+     "tipo": "lista",
+     "app": "Receta",
+     "items": [
+      "agua fría",
+      "2 o 3 lavados",
+      "escurrir bien"
+     ]
+    }
+   }
+  },
+  {
+   "texto": "Segundo: no lo remuevas mientras se cuece.",
+   "claves": [
+    "remuevas"
+   ],
+   "poses": [
+    "brazos_cruzados"
+   ],
+   "escena": {
+    "tipo": "paso",
+    "n": 2,
+    "total": 3,
+    "titulo": [
+     "no lo",
+     "remuevas"
+    ],
+    "clave": "remuevas",
+    "tarjeta": {
+     "tipo": "chat",
+     "app": "Nota",
+     "nota": "tapa y fuego bajo",
+     "texto": "ni una vuelta de cuchara"
+    }
+   }
+  },
+  {
+   "texto": "Tercero: déjalo reposar cinco minutos antes de servir.",
+   "claves": [
+    "reposar"
+   ],
+   "poses": [
+    "piensa",
+    "pulgar"
+   ],
+   "escena": {
+    "tipo": "paso",
+    "n": 3,
+    "total": 3,
+    "titulo": [
+     "déjalo",
+     "reposar"
+    ],
+    "clave": "reposar",
+    "tarjeta": {
+     "tipo": "voz",
+     "app": "Temporizador",
+     "nombre": "reposo",
+     "segundos": 59
+    }
+   }
+  },
+  {
+   "texto": "Y listo: suelto y perfecto.",
+   "claves": [
+    "perfecto"
+   ],
+   "poses": [
+    "celebra"
+   ],
+   "escena": {
+    "tipo": "paisaje",
+    "cielo": "dia",
+    "camara": "cerca"
+   }
+  },
+  {
+   "texto": "Comenta ARROZ y te mando mi receta completa.",
+   "claves": [
+    "ARROZ"
+   ],
+   "poses": [
+    "saluda",
+    "senala_camara"
+   ],
+   "escena": {
+    "tipo": "cta",
+    "cielo": "atardecer",
+    "cta": {
+     "palabra": "ARROZ",
+     "respuesta": "¡Ahí va tu receta!",
+     "archivos": [
+      "receta-arroz.pdf"
+     ]
+    }
+   }
+  }
+ ]
+}

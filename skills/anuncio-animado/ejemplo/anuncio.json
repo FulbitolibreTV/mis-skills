@@ -1,0 +1,57 @@
+{
+  "estilo": "limpio",
+  "salida": "anuncio",
+  "ancho": 1080,
+  "alto": 1920,
+  "fps": 30,
+  "duracion": 9.54,
+  "marca": {
+    "nombre": "Charlo",
+    "colores": {
+      "principal": "#7B4DFF"
+    },
+    "letra_titulos": "Fredoka"
+  },
+  "textos": {
+    "pregunta": "¿Quieres aprender un idioma nuevo?",
+    "bocadillo": "¡Yo te ayudo!",
+    "palabras": [
+      "Practica",
+      "Progresa",
+      "Aprende"
+    ],
+    "iconos": [
+      "engranaje",
+      "flecha",
+      "libro"
+    ],
+    "descubre": "Descubre",
+    "movil": "Unidad 1 · Saludos",
+    "dato": "+100 idiomas para aprender",
+    "tarjeta": {
+      "titulo": "Di esta frase",
+      "frase": "Un café",
+      "boton": "TOCA PARA HABLAR",
+      "icono_frase": "altavoz",
+      "icono_boton": "micro"
+    },
+    "iconos_movil": [
+      "estrella",
+      "libro",
+      "altavoz",
+      "estrella",
+      "micro",
+      "libro"
+    ]
+  },
+  "tiempos": [
+    0,
+    1.0,
+    2.45,
+    3.4,
+    4.42,
+    6.0,
+    7.15,
+    7.76
+  ]
+}

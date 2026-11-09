@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es" data-resolution="portrait">
+  <!-- Montaje mínimo con HyperFrames: el clip (clip.mp4, en esta carpeta) a pantalla completa y un titular
+       al principio. Cambia DURACION (en segundos, la del clip) en los tres data-duration y el texto del titular.
+       Render desde esta carpeta: node <hyperframes>/node_modules/hyperframes/bin/hyperframes.mjs render -o SALIDA.mp4 -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+      #clip { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; object-fit: cover; }
+      #capa { position: absolute; left: 0; top: 260px; width: 1080px; display: flex; justify-content: center; }
+      #titular { background: #ffd166; color: #1d2433; font: 800 72px "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+                 padding: 18px 36px; border-radius: 18px; max-width: 900px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="10" data-width="1080" data-height="1920">
+      <video id="clip" class="clip" src="clip.mp4" data-start="0" data-duration="10" data-track-index="0"></video>
+      <div id="capa" class="clip" data-start="0" data-duration="2.5" data-track-index="1"><div id="titular">Mi gancho</div></div>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#titular", { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(2)" }, 0);
+      tl.to("#titular", { opacity: 0, duration: 0.25 }, 2.2);
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
