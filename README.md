@@ -11,7 +11,32 @@ Colección de skills y plugins para Claude, en español: vídeos verticales (ree
 | `zips/` | Cada skill y plugin ya comprimido, listo para subir a Claude |
 | `guias/` | Guías y chuletas en PDF |
 
-## Cómo instalar una skill o plugin
+## Instalar con Claude (lo más rápido)
+
+**Opción 1: pídeselo a Claude Code.** Abre Claude Code (terminal o pestaña Code de la app de escritorio) y pega esto:
+
+```
+Instala las skills y plugins de https://github.com/FulbitolibreTV/mis-skills
+```
+
+**Opción 2: dos comandos.** En Claude Code:
+
+```
+/plugin marketplace add FulbitolibreTV/mis-skills
+/plugin install skills-video --marketplace FulbitolibreTV/mis-skills
+```
+
+Eso instala las 10 skills de vídeo de una vez. Los plugins se instalan igual, cambiando el nombre:
+
+```
+/plugin install becario-equipo --marketplace FulbitolibreTV/mis-skills
+/plugin install becario-kit --marketplace FulbitolibreTV/mis-skills
+/plugin install becario-mods --marketplace FulbitolibreTV/mis-skills
+```
+
+> En el chat normal de Claude (web o móvil) Claude no puede instalarse skills a sí mismo: ahí usa los ZIP de `zips/` como se explica abajo.
+
+## Cómo instalar una skill o plugin a mano
 
 **En Claude (web, app de escritorio o móvil)**
 
