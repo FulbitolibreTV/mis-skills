@@ -1,0 +1,88 @@
+name: Integrar cinco plugins para Claude Code
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/integrar-cinco-plugins.yml"
+      - "integracion-cinco-plugins.zip"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Descomprimir paquete y registrar plugin
+        shell: bash
+        run: |
+          python3 - <<'PYBOOT'
+          import json
+          from pathlib import Path, PurePosixPath
+          from zipfile import ZipFile
+          archive=Path('integracion-cinco-plugins.zip')
+          if not archive.is_file():
+              raise SystemExit('Falta integracion-cinco-plugins.zip en la raíz')
+          with ZipFile(archive) as z:
+              if z.testzip() is not None:
+                  raise SystemExit('ZIP dañado')
+              for info in z.infolist():
+                  name=info.filename
+                  path=PurePosixPath(name)
+                  if path.is_absolute() or '..' in path.parts or '\\' in name:
+                      raise SystemExit('Ruta insegura en ZIP')
+                  allowed=(name.startswith('plugins/cinco-plugins/') or name=='guias/GUIA-5-PLUGINS.md')
+                  if allowed and not info.is_dir():
+                      if info.file_size > 500_000:
+                          raise SystemExit('Archivo demasiado grande')
+                      target=Path(name)
+                      target.parent.mkdir(parents=True,exist_ok=True)
+                      target.write_bytes(z.read(info))
+              snippet=z.read('README-SNIPPET.md').decode('utf-8')
+              entry=json.loads(z.read('marketplace-entry.json').decode('utf-8'))
+          required=['plugins/cinco-plugins/.claude-plugin/plugin.json',
+                    'plugins/cinco-plugins/skills/instalar-cinco-plugins/SKILL.md',
+                    'plugins/cinco-plugins/GUIA.md']
+          for fname in required:
+              if not Path(fname).is_file():
+                  raise SystemExit('Archivo requerido faltante: '+fname)
+          plugin=json.loads(Path(required[0]).read_text(encoding='utf-8'))
+          if plugin.get('name')!='cinco-plugins' or entry.get('name')!='cinco-plugins':
+              raise SystemExit('Nombre de plugin incorrecto')
+          marketplace=Path('.claude-plugin/marketplace.json')
+          data=json.loads(marketplace.read_text(encoding='utf-8'))
+          names=[p.get('name') for p in data['plugins']]
+          if 'cinco-plugins' not in names:
+              data['plugins'].append(entry)
+              marketplace.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          readme=Path('README.md')
+          original=readme.read_text(encoding='utf-8')
+          if '## Cinco plugins de Claude Code (guía @noisy.ia)' not in original:
+              readme.write_text(original.rstrip()+'\n\n'+snippet.lstrip(),encoding='utf-8')
+          print('Plugin registrado, archivos revisados y contenido original preservado.')
+          PYBOOT
+      - name: Verificar JSON, estructura y referencias
+        run: |
+          python3 - <<'PYTEST'
+          import json
+          from pathlib import Path
+          p=Path('plugins/cinco-plugins')
+          meta=json.loads((p/'.claude-plugin/plugin.json').read_text())
+          mk=json.loads(Path('.claude-plugin/marketplace.json').read_text())
+          assert meta['name']=='cinco-plugins'
+          assert sum(x['name']=='cinco-plugins' for x in mk['plugins'])==1
+          assert (p/'skills/instalar-cinco-plugins/SKILL.md').read_text().startswith('---\n')
+          for name in ('Playwright','OmniRoute','Headroom','MemPalace','Frontend Design'):
+              assert name in (p/'GUIA.md').read_text()
+          assert Path('README.md').read_text().count('## Cinco plugins de Claude Code (guía @noisy.ia)')==1
+          print('Validación del paquete: OK')
+          PYTEST
+      - name: Guardar archivos en GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md .claude-plugin/marketplace.json plugins/cinco-plugins guias/GUIA-5-PLUGINS.md
+          git diff --cached --quiet || (git commit -m "Agregar kit de 5 plugins para Claude Code" && git push)
