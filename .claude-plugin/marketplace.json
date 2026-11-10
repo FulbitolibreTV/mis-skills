@@ -40,6 +40,11 @@
         "./skills/becario-editor",
         "./skills/youtube-agent"
       ]
+    },
+    {
+      "name": "cinco-plugins",
+      "source": "./plugins/cinco-plugins",
+      "description": "Guía de instalación y comprobación de Playwright, OmniRoute, Headroom, MemPalace y Frontend Design para Claude Code."
     }
   ]
 }

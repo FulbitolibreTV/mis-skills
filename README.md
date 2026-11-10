@@ -147,3 +147,16 @@ Tres mods para que te dure más el límite de uso de Claude Code (requiere Claud
 ---
 
 Hecho por mí. ¡Sígueme en [Instagram](https://www.instagram.com/jossports10), [YouTube](https://www.youtube.com/@Factscuriosos19) y [Facebook](https://www.facebook.com/share/1CUAbp5cRo/)!
+
+## Cinco plugins de Claude Code (guía @noisy.ia)
+
+El plugin **`cinco-plugins`** orienta y comprueba la instalación de **Playwright**, **OmniRoute**, **Headroom**, **MemPalace** y **Frontend Design**, siguiendo la guía de @noisy.ia. No incorpora ni ejecuta automáticamente los programas externos: cada herramienta se instala desde su repositorio o marketplace oficial, con permiso del usuario.
+
+```text
+/plugin marketplace add FulbitolibreTV/mis-skills
+/plugin install cinco-plugins --marketplace FulbitolibreTV/mis-skills
+```
+
+Después, en Claude Code: `/cinco-plugins:instalar-cinco-plugins`. Para solo revisar: `/cinco-plugins:instalar-cinco-plugins comprobar`. La guía está en [`plugins/cinco-plugins/GUIA.md`](plugins/cinco-plugins/GUIA.md).
+
+**No confundir con `becario-kit`**: este último conserva MODS como quinto componente. Este conjunto incluye OmniRoute, tal como figura en el PDF de referencia.
