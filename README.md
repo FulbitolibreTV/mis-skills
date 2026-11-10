@@ -160,3 +160,15 @@ El plugin **`cinco-plugins`** orienta y comprueba la instalación de **Playwrigh
 Después, en Claude Code: `/cinco-plugins:instalar-cinco-plugins`. Para solo revisar: `/cinco-plugins:instalar-cinco-plugins comprobar`. La guía está en [`plugins/cinco-plugins/GUIA.md`](plugins/cinco-plugins/GUIA.md).
 
 **No confundir con `becario-kit`**: este último conserva MODS como quinto componente. Este conjunto incluye OmniRoute, tal como figura en el PDF de referencia.
+
+## Opus Video Inspiración — animaciones con código
+
+Nueva skill `opus-video-inspiracion` para estudiar técnicas de motion graphics, explainers, escenas 3D y animaciones interactivas y producir **videos originales** en HTML/Canvas/SVG/Three.js. Referencias: [awesome-opus5-5-videos](https://github.com/yihui-dev/awesome-opus5-5-videos) de yihui-dev. Se enlazan ejemplos de sus creadores sin redistribuir videos ni copiar sus prompts.
+
+- Fuente: [`skills/opus-video-inspiracion/`](skills/opus-video-inspiracion/)
+- ZIP para Claude: [`zips/opus-video-inspiracion-v1.0.0.zip`](zips/opus-video-inspiracion-v1.0.0.zip)
+- Para Claude Code: la skill se incluye dentro del plugin `skills-video` del marketplace de este repositorio.
+
+Ejemplo: «Crea un Reel de 30 segundos sobre cómo funciona una turbina, estilo técnico 9:16, con referencias de opus-video-inspiracion. Quiero HTML animado y MP4 solo si puedes verificar su exportación».
+
+El catálogo enlazado tiene licencia MIT para el proyecto, pero cada video y prompt pertenece al creador indicado en sus páginas; las obras, música y activos de terceros requieren sus propios permisos.
