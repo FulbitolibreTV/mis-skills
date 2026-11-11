@@ -1,0 +1,455 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<title>Dedos arrugados</title>
+<style>
+@font-face{font-family:Inter;font-weight:500;src:url(fonts/inter-500-normal.woff2)}
+@font-face{font-family:Inter;font-weight:600;src:url(fonts/inter-600-normal.woff2)}
+@font-face{font-family:Inter;font-weight:700;src:url(fonts/inter-700-normal.woff2)}
+@font-face{font-family:'JetBrains Mono';font-weight:500;src:url(fonts/jetbrains-mono-latin-500-normal.woff2)}
+@font-face{font-family:'JetBrains Mono';font-weight:800;src:url(fonts/jetbrains-mono-latin-800-normal.woff2)}
+html,body{margin:0;background:#05070d;height:100%}
+canvas{display:block;height:100vh;margin:0 auto;aspect-ratio:9/16}
+</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="words.js"></script>
+<script>
+// ============ «¿Por qué se te arrugan los dedos?» · motion graphics, deterministic: window.seek(t) draws the frame at t ============
+const W = 1080, H = 1920, FPS = 30, TAU = Math.PI * 2;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+// palette: one accent (aqua = water), warm skin, gold = nerve signal, coral = blood
+const K = { bg0: '#05070d', bg1: '#0c1322', ink: '#f4f6fb', dim: '#7d869a', line: 'rgba(255,255,255,.08)',
+  aqua: '#3fe0ff', aquaD: '#0e7fa8', gold: '#ffd166', coral: '#ff5d6c', skin0: '#ffc7ad', skin1: '#f29a7c', skin2: '#c86a55', green: '#43e5a0' };
+
+// ---------- math ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const inv = (a, b, v) => clamp((v - a) / (b - a));
+const eio = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const eo = k => 1 - Math.pow(1 - k, 3);
+const eo5 = k => 1 - Math.pow(1 - k, 5);
+const back = k => { const c = 1.6; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+function rng(seed) { let s = seed >>> 0 || 1; return () => { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; return ((s >>> 0) % 100000) / 100000; }; }
+
+// ---------- timing from the voice ----------
+const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ñ%]/g, '');
+const LINE = i => WORDS.find(w => w.line === i).s;
+function WT(word, n = 0, from = 0) { const m = WORDS.filter(w => w.line >= from && norm(w.w) === norm(word)); return m[n] ? m[n].s : LINE(from); }
+const END = WORDS[WORDS.length - 1].e, DUR = END + 1.4;
+
+// ---------- primitives ----------
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+function circ(x, y, r) { ctx.beginPath(); ctx.arc(x, y, Math.max(.1, r), 0, TAU); }
+function lg(x0, y0, x1, y1, st) { const g = ctx.createLinearGradient(x0, y0, x1, y1); st.forEach(([o, c]) => g.addColorStop(o, c)); return g; }
+function rg(x, y, r, st) { const g = ctx.createRadialGradient(x, y, 0, x, y, r); st.forEach(([o, c]) => g.addColorStop(o, c)); return g; }
+function glowLine(path, col, w, a = 1) {
+  if (a <= 0) return; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  [[w * 6, .06], [w * 3, .14], [w * 1.5, .4]].forEach(([lw, al]) => { path(); ctx.lineWidth = lw; ctx.strokeStyle = col; ctx.globalAlpha = al * a; ctx.stroke(); });
+  path(); ctx.lineWidth = w; ctx.strokeStyle = col; ctx.globalAlpha = a; ctx.stroke(); path(); ctx.lineWidth = w * .35; ctx.strokeStyle = '#fff'; ctx.globalAlpha = .7 * a; ctx.stroke(); ctx.restore();
+}
+function blob(x, y, r, rgb, a) { if (a <= 0) return; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = rg(x, y, r, [[0, `rgba(${rgb},${a})`], [.45, `rgba(${rgb},${a * .3})`], [1, `rgba(${rgb},0)`]]); ctx.fillRect(x - r, y - r, 2 * r, 2 * r); ctx.restore(); }
+function font(sz, wt = 800, fam = 'Inter') { ctx.font = `${wt} ${sz}px ${fam}`; }
+function txt(s, x, y, sz, col = K.ink, wt = 800, al = 'center', fam = 'Inter', sp = 0) {
+  font(sz, wt, fam); ctx.letterSpacing = sp + 'px'; ctx.textAlign = al; ctx.textBaseline = 'middle'; ctx.fillStyle = col; ctx.fillText(s, x, y); ctx.letterSpacing = '0px';
+}
+// kinetic headline: each word rises out of a mask, staggered. parts = [['¿POR QUÉ', K.ink], ['DEDOS?', K.aqua]] one per line
+function headline(lines, x, y, sz, t0, t, out = 1e9, stagger = .07) {
+  let i = 0; const lh = sz * 1.02;
+  lines.forEach(([s, col], li) => {
+    const yy = y + (li - (lines.length - 1) / 2) * lh; font(sz); ctx.letterSpacing = (-sz * .03) + 'px';
+    const words = s.split(' '), sp = ctx.measureText(' ').width, ws = words.map(w => ctx.measureText(w).width), tot = ws.reduce((a, b) => a + b, 0) + sp * (words.length - 1);
+    let xx = x - tot / 2;
+    words.forEach((w, wi) => {
+      const k = eo5(inv(t0 + i * stagger, t0 + i * stagger + .45, t)), ko = eio(inv(out, out + .35, t));
+      ctx.save(); ctx.beginPath(); ctx.rect(xx - 20, yy - sz * .62, ws[wi] + 40, sz * 1.22); ctx.clip();
+      ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillText(w, xx, yy + (1 - k) * sz * 1.1 - ko * sz * 1.1); ctx.restore();
+      xx += ws[wi] + sp; i++;
+    });
+    ctx.letterSpacing = '0px';
+  });
+}
+// small mono tag with a dot: "● MITO"
+function tag(s, x, y, col, p, sz = 30) {
+  if (p <= 0) return; const k = eo(clamp(p)); ctx.save(); ctx.globalAlpha = k; ctx.translate(0, (1 - k) * 16);
+  font(sz, 800, 'JetBrains Mono'); ctx.letterSpacing = '4px'; const w = ctx.measureText(s).width + sz * 2.2;
+  rr(x - w / 2, y - sz * .95, w, sz * 1.9, sz * .95); ctx.fillStyle = 'rgba(10,14,24,.78)'; ctx.fill(); ctx.strokeStyle = col; ctx.globalAlpha = k * .7; ctx.lineWidth = 2.5; ctx.stroke(); ctx.globalAlpha = k;
+  circ(x - w / 2 + sz * .85, y, sz * .22); ctx.fillStyle = col; ctx.fill();
+  ctx.fillStyle = K.ink; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s, x - w / 2 + sz * 1.35, y + 1); ctx.letterSpacing = '0px';
+  ctx.restore();
+}
+// glass card behind an illustration
+function card(x, y, w, h, p = 1, r = 56) {
+  if (p <= 0) return; ctx.save(); ctx.globalAlpha = clamp(p);
+  rr(x, y, w, h, r); ctx.fillStyle = lg(x, y, x, y + h, [[0, 'rgba(255,255,255,.07)'], [1, 'rgba(255,255,255,.02)']]); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+}
+
+// ---------- the world: deep ink, slow aurora, fine dot grid, floating motes ----------
+function backdrop(t, hue = K.aqua, k = 1) {
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); backdrop0(t, hue, k); ctx.restore();
+}
+function backdrop0(t, hue, k) {
+  ctx.fillStyle = lg(0, 0, 0, H, [[0, K.bg1], [1, K.bg0]]); ctx.fillRect(0, 0, W, H);
+  const ax = 540 + Math.sin(t * .23) * 260, ay = 700 + Math.cos(t * .17) * 200;
+  ctx.save(); ctx.globalAlpha = .5 * k; ctx.fillStyle = rg(ax, ay, 900, [[0, hue + '33'], [1, hue + '00']]); ctx.fillRect(0, 0, W, H); ctx.restore();
+  ctx.fillStyle = 'rgba(255,255,255,.055)';
+  for (let y = 60; y < H; y += 60) for (let x = 30 + (y / 60 % 2) * 30; x < W; x += 60) { ctx.fillRect(x, y, 2, 2); }
+  const R = rng(3);
+  for (let i = 0; i < 40; i++) { const x = (R() * W + t * (8 + R() * 14)) % W, y = (R() * H - t * (10 + R() * 30) + H * 4) % H; circ(x, y, 1 + R() * 2.2); ctx.fillStyle = `rgba(160,230,255,${.12 + R() * .25})`; ctx.fill(); }
+}
+function vignette() { ctx.fillStyle = rg(540, 960, 1250, [[0, 'rgba(0,0,0,0)'], [.65, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,.75)']]); ctx.fillRect(0, 0, W, H); }
+
+// ---------- illustrations ----------
+// clean fingertip, pointing up. (x, y) = tip, w = width. wr = wrinkle 0..1. o.nerve 0..1, o.cut 0..1, o.t
+function finger(x, y, w, wr = 0, o = {}) {
+  const h = 1400, t = o.t || 0;
+  const body = () => { ctx.beginPath(); ctx.moveTo(x - w / 2, y + h); ctx.lineTo(x - w / 2, y + w / 2); ctx.arc(x, y + w / 2, w / 2, Math.PI, 0); ctx.lineTo(x + w / 2, y + h); ctx.closePath(); };
+  ctx.save();
+  body(); ctx.fillStyle = lg(x - w / 2, 0, x + w / 2, 0, [[0, K.skin2], [.18, K.skin1], [.5, K.skin0], [.85, K.skin1], [1, K.skin2]]); ctx.fill();
+  body(); ctx.clip();
+  // rim light + soft pad shading
+  ctx.fillStyle = rg(x - w * .1, y + w * .55, w * .8, [[0, 'rgba(255,230,215,.55)'], [1, 'rgba(255,230,215,0)']]); ctx.fillRect(x - w, y - 10, 2 * w, w * 1.6);
+  // soaked: pale with a cool tint
+  if (wr > 0) { ctx.fillStyle = `rgba(200,225,255,${.2 * wr})`; ctx.fillRect(x - w, y - 10, 2 * w, h); }
+  // fingerprint, very subtle
+  ctx.strokeStyle = `rgba(160,80,60,${.16 * (1 - wr * .7)})`; ctx.lineWidth = w * .008;
+  for (let r = w * .07; r < w * .7; r += w * .06) { ctx.beginPath(); ctx.ellipse(x, y + w * .6, r * .78, r, 0, Math.PI * 1.08, Math.PI * 2.92); ctx.stroke(); }
+  // wrinkles: smooth lengthwise ridges (valley + highlight), they grow from the tip down
+  if (wr > 0) {
+    const n = 8;
+    for (let i = 0; i < n; i++) {
+      const u = (i + .5) / n - .5, x0 = x + u * w * .78, ph = i * 1.7, len = w * (.55 + .5 * ((i * 37) % 10) / 10) * eo(clamp(wr * 1.4 - i * .04));
+      if (len < 2) continue;
+      const pts = []; for (let s = 0; s <= 1.0001; s += .05) { const yy = y + w * .14 + s * len; pts.push([x0 * (1) + Math.sin(s * 5 + ph) * w * .022 * wr - u * w * .12 * (1 - s), yy]); }
+      const path = dx => { ctx.beginPath(); pts.forEach(([px, py], j) => j ? ctx.lineTo(px + dx, py) : ctx.moveTo(px + dx, py)); };
+      ctx.lineCap = 'round';
+      path(w * .014); ctx.strokeStyle = `rgba(255,240,232,${.6 * wr})`; ctx.lineWidth = w * .026; ctx.stroke();
+      path(-w * .006); ctx.strokeStyle = `rgba(130,55,45,${.55 * wr})`; ctx.lineWidth = w * .03; ctx.stroke();
+    }
+  }
+  // the nerve inside: gold line with pulses running up
+  if (o.nerve > 0) {
+    const yc = y + w * 1.3, cut = o.cut || 0;
+    const path = () => { ctx.beginPath(); ctx.moveTo(x, y + h); for (let yy = y + h; yy > y + w * .35; yy -= 16) ctx.lineTo(x + Math.sin(yy / 60) * w * .05, yy); };
+    glowLine(path, cut > .5 ? '#6b6f7a' : K.gold, w * .018, o.nerve);
+    for (let i = 0; i < 5; i++) { const yy = y + h - ((t * 600 + i * 280) % (h - w * .35)); if (cut > .5 && yy < yc) continue; blob(x + Math.sin(yy / 60) * w * .05, yy, w * .16, '255,209,102', .9 * o.nerve); }
+    if (cut > 0) { const k = eo(clamp(cut)), s = w * .13 * k; blob(x, yc, w * .45, '255,93,108', .8 * k); ctx.lineCap = 'round'; ctx.strokeStyle = K.coral; ctx.lineWidth = w * .035; ctx.beginPath(); ctx.moveTo(x - s, yc - s); ctx.lineTo(x + s, yc + s); ctx.moveTo(x + s, yc - s); ctx.lineTo(x - s, yc + s); ctx.stroke(); }
+  }
+  ctx.restore();
+  // outline glow
+  ctx.save(); body(); ctx.strokeStyle = 'rgba(255,220,200,.25)'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
+}
+// water body below y with a glowing surface line and rising bubbles
+function water(y, t, a = 1, x0 = -320, x1 = W + 320) {
+  if (a <= 0) return; ctx.save(); ctx.globalAlpha = a;
+  const sy = x => y + Math.sin(x / 80 + t * 2.6) * 7 + Math.sin(x / 33 - t * 1.7) * 3;
+  ctx.beginPath(); ctx.moveTo(x0, H + 600); for (let x = x0; x <= x1; x += 12) ctx.lineTo(x, sy(x)); ctx.lineTo(x1, H + 600); ctx.closePath();
+  ctx.fillStyle = lg(0, y, 0, H, [[0, 'rgba(63,224,255,.30)'], [1, 'rgba(14,127,168,.40)']]); ctx.fill();
+  glowLine(() => { ctx.beginPath(); for (let x = x0; x <= x1; x += 12) x === x0 ? ctx.moveTo(x, sy(x)) : ctx.lineTo(x, sy(x)); }, K.aqua, 3, .8);
+  const R = rng(9);
+  for (let i = 0; i < 18; i++) { const bx = x0 + R() * (x1 - x0), sp = 70 + R() * 90, by = H - ((t * sp + R() * 2000) % (H - y)); if (by < y + 14) continue; circ(bx + Math.sin(t * 2 + i) * 6, by, 4 + R() * 9); ctx.strokeStyle = 'rgba(200,245,255,.55)'; ctx.lineWidth = 2; ctx.stroke(); }
+  ctx.restore();
+}
+// smooth forearm (a wide soft capsule) for the comparison
+function arm(x, y, w, h) {
+  ctx.save(); rr(x - w / 2, y, w, h, w / 2); ctx.fillStyle = lg(x - w / 2, 0, x + w / 2, 0, [[0, K.skin2], [.3, K.skin1], [.6, K.skin0], [1, K.skin1]]); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,220,200,.25)'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
+}
+// skin cross-section inside a card: x,y,w,h = window. vr = vessel size, fold = buckling 0..1, sig = nerve signal 0..1, soak = arrows in
+function section(x, y, w, h, t, o = {}) {
+  const vr = o.vr ?? 1, fold = o.fold || 0, sig = o.sig || 0, soak = o.soak || 0;
+  ctx.save(); rr(x, y, w, h, 48); ctx.clip();
+  ctx.fillStyle = '#0a101c'; ctx.fillRect(x, y, w, h);
+  const top = y + h * .22 + fold * h * .06, surf = xx => top + Math.sin((xx - x) / w * TAU * 4.2) * h * .045 * fold;
+  // water above
+  ctx.fillStyle = lg(0, y, 0, top, [[0, 'rgba(63,224,255,.05)'], [1, 'rgba(63,224,255,.22)']]); ctx.fillRect(x, y, w, top - y + 40);
+  // tissue
+  ctx.beginPath(); ctx.moveTo(x, y + h); for (let xx = x; xx <= x + w; xx += 8) ctx.lineTo(xx, surf(xx)); ctx.lineTo(x + w, y + h); ctx.closePath();
+  ctx.fillStyle = lg(0, top, 0, y + h, [[0, K.skin0], [.07, K.skin1], [.35, '#d97a66'], [1, '#7a3a35']]); ctx.fill();
+  // epidermis band
+  ctx.beginPath(); for (let xx = x; xx <= x + w; xx += 8) { const yy = surf(xx) + h * .05; xx === x ? ctx.moveTo(xx, yy) : ctx.lineTo(xx, yy); } ctx.strokeStyle = 'rgba(120,40,35,.35)'; ctx.lineWidth = 4; ctx.stroke();
+  // surface glow line
+  glowLine(() => { ctx.beginPath(); for (let xx = x; xx <= x + w; xx += 8) xx === x ? ctx.moveTo(xx, surf(xx)) : ctx.lineTo(xx, surf(xx)); }, '#ffd9c8', 2, .5);
+  // vessels
+  [.5, .66, .82].forEach((fy, i) => {
+    const yy = y + h * fy, r = h * (.042 - i * .006) * vr;
+    const path = () => { ctx.beginPath(); for (let xx = x - 20; xx <= x + w + 20; xx += 12) { const y2 = yy + Math.sin((xx - x) / 140 + i * 2) * h * .025; xx === x - 20 ? ctx.moveTo(xx, y2) : ctx.lineTo(xx, y2); } };
+    ctx.lineCap = 'round'; path(); ctx.lineWidth = r * 2 + 8; ctx.strokeStyle = '#6e1f2b'; ctx.stroke(); path(); ctx.lineWidth = r * 2; ctx.strokeStyle = K.coral; ctx.stroke();
+    path(); ctx.lineWidth = r * .5; ctx.strokeStyle = 'rgba(255,200,205,.35)'; ctx.stroke();
+    const n = vr < .55 ? 3 : 8;
+    for (let j = 0; j < n; j++) { const xx = x + ((t * (190 + i * 30) * vr + j * w / n) % (w + 40)) - 20, y2 = yy + Math.sin((xx - x) / 140 + i * 2) * h * .025; ctx.beginPath(); ctx.ellipse(xx, y2, r * .5, r * .32, 0, 0, TAU); ctx.fillStyle = '#ffb3bb'; ctx.fill(); }
+  });
+  // nerve
+  if (o.nerve) {
+    const P = [[x + w * .08, y + h], [x + w * .2, y + h * .75], [x + w * .45, y + h * .62], [x + w * .9, y + h * .42]];
+    const path = () => { ctx.beginPath(); ctx.moveTo(...P[0]); ctx.bezierCurveTo(...P[1], ...P[2], ...P[3]); };
+    glowLine(path, K.gold, 4, o.nerve);
+    const bz = (u, a) => (1 - u) ** 3 * P[0][a] + 3 * (1 - u) ** 2 * u * P[1][a] + 3 * (1 - u) * u * u * P[2][a] + u ** 3 * P[3][a];
+    for (let i = 0; i < 3; i++) { const u = (t * .7 + i / 3) % 1; blob(bz(u, 0), bz(u, 1), 60, '255,209,102', sig); }
+  }
+  // the myth: water arrows going in
+  if (soak > 0) for (let i = 0; i < 6; i++) {
+    const xx = x + w * (.12 + i * .155), ph = (t * 1.1 + i * .29) % 1, yy = top - h * .16 + ph * h * .2;
+    ctx.save(); ctx.globalAlpha = soak * Math.sin(ph * Math.PI); ctx.strokeStyle = K.aqua; ctx.fillStyle = K.aqua; ctx.lineWidth = 7; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx, yy + 50); ctx.stroke(); ctx.beginPath(); ctx.moveTo(xx - 16, yy + 44); ctx.lineTo(xx, yy + 68); ctx.lineTo(xx + 16, yy + 44); ctx.fill(); ctx.restore();
+  }
+  ctx.restore();
+  ctx.save(); rr(x, y, w, h, 48); ctx.strokeStyle = 'rgba(255,255,255,.14)'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+}
+// tyre tread (top view) with water pushed out along chevron grooves
+function tread(x, y, w, h, t, flow) {
+  ctx.save(); rr(x, y, w, h, 40); ctx.fillStyle = lg(x, 0, x + w, 0, [[0, '#151922'], [.5, '#2b313d'], [1, '#151922']]); ctx.fill(); ctx.clip();
+  const n = 7, gy = i => y + 70 + i * (h - 140) / (n - 1);
+  for (let i = 0; i < n; i++) { ctx.beginPath(); ctx.moveTo(x - 10, gy(i) - 70); ctx.lineTo(x + w / 2, gy(i)); ctx.lineTo(x + w + 10, gy(i) - 70); ctx.lineWidth = 24; ctx.strokeStyle = '#07090e'; ctx.lineCap = 'round'; ctx.stroke(); }
+  if (flow > 0) for (let i = 0; i < n; i++) for (const s of [-1, 1]) { const u = (t * 1.2 + i * .19) % 1, px = x + w / 2 + s * u * (w / 2 + 10), py = gy(i) - u * 70; circ(px, py, 9); ctx.fillStyle = `rgba(63,224,255,${flow})`; ctx.fill(); blob(px, py, 26, '63,224,255', .5 * flow); }
+  ctx.restore(); ctx.save(); rr(x, y, w, h, 40); ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+}
+function marble(x, y, r, col) { circ(x, y, r); ctx.fillStyle = rg(x - r * .35, y - r * .35, r * 1.4, [[0, '#fff'], [.25, col], [1, '#111']]); ctx.fill(); }
+// simple brain glyph (line art) and a body outline for the nervous system
+function brainGlyph(x, y, s, k) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const out = () => { ctx.beginPath(); ctx.moveTo(-120, 20); ctx.bezierCurveTo(-150, -60, -90, -130, -10, -120); ctx.bezierCurveTo(60, -150, 150, -90, 135, -10); ctx.bezierCurveTo(160, 50, 110, 100, 50, 85); ctx.bezierCurveTo(10, 120, -60, 110, -80, 80); ctx.bezierCurveTo(-130, 80, -140, 50, -120, 20); };
+  out(); ctx.fillStyle = 'rgba(255,209,102,.08)'; ctx.fill();
+  glowLine(out, K.gold, 4, .5 + .5 * k);
+  const folds = [[[-80, -40], [-40, -80], [10, -60]], [[-90, 30], [-30, 0], [20, 30]], [[30, -90], [60, -40], [110, -30]], [[40, 30], [80, 10], [100, 50]], [[-40, 70], [0, 40], [40, 70]]];
+  folds.forEach(f => glowLine(() => { ctx.beginPath(); ctx.moveTo(...f[0]); ctx.quadraticCurveTo(...f[1], ...f[2]); }, K.gold, 2.5, .35 + .5 * k));
+  ctx.restore();
+}
+
+// ---------- scenes: [start, draw(t, lt)] ----------
+const S = [];
+const scene = (t0, fn, tr = 'iris') => S.push({ t0, fn, tr });
+const L = LINE;
+
+// 0 · HOOK — giant fingertip wrinkling in water, the question slams in
+scene(0, (t, lt) => {
+  backdrop(t, K.aqua);
+  const z = lerp(1.55, 1, eo5(inv(0, .9, lt))) + lt * .02;
+  ctx.save(); ctx.translate(540, 1150); ctx.scale(z, z); ctx.translate(-540, -1150);
+  finger(540, 760, 520, eo(inv(.15, 1.6, lt)), { t }); water(1060, t);
+  ctx.restore();
+  headline([['¿POR QUÉ SE', K.ink], ['ARRUGAN LOS', K.ink], ['DEDOS?', K.aqua]], 540, 400, 118, .05, t);
+});
+// 0b · fingers vs arm
+scene(WT('pero') - .05, (t, lt) => {
+  backdrop(t, K.aqua);
+  card(70, 560, 450, 1010, eo(inv(0, .3, lt))); card(560, 560, 450, 1010, eo(inv(.08, .38, lt)));
+  ctx.save(); rr(70, 560, 450, 1010, 56); ctx.clip(); finger(295, 700 + (1 - eo(inv(0, .4, lt))) * 300, 260, 1, { t }); water(1060, t, 1, 70, 520); ctx.restore();
+  ctx.save(); rr(560, 560, 450, 1010, 56); ctx.clip(); arm(785, 650 + (1 - eo(inv(.1, .5, lt))) * 300, 300, 1200); water(1060, t, 1, 560, 1010); ctx.restore();
+  tag('DEDOS · ARRUGAS', 295, 500, K.aqua, inv(.1, .4, lt), 26);
+  tag('BRAZO · LISO', 785, 500, K.dim, inv(WT('brazos') - .1, WT('brazos') + .2, t), 26);
+  headline([['¿Y LOS BRAZOS NO?', K.ink]], 540, 1700, 76, WT('brazos') - .1, t);
+}, 'slide');
+// 1 · MYTH — "skin soaks up water" → FALSE
+scene(L(1), (t, lt) => {
+  backdrop(t, K.aqua);
+  tag('MITO', 540, 330, K.coral, inv(0, .3, lt));
+  headline([['LA PIEL', K.ink], ['ABSORBE AGUA', K.aqua]], 540, 520, 104, .1, t);
+  const sw = eo(inv(WT('hincha') - .2, WT('hincha') + .6, t));
+  section(110, 760, 860, 760, t, { soak: 1, vr: 1, fold: 0 });
+  // "swelling" ghost outline
+  ctx.save(); ctx.globalAlpha = .6 * sw * (1 - inv(WT('eso'), WT('eso') + .3, t)); ctx.setLineDash([16, 14]); ctx.strokeStyle = K.aqua; ctx.lineWidth = 4; rr(110 - 20 * sw, 760 - 30 * sw, 860 + 40 * sw, 760 + 60 * sw, 60); ctx.stroke(); ctx.restore();
+  // FALSE: a slash + stamp
+  const f = eo5(inv(WT('eso'), WT('eso') + .35, t));
+  if (f > 0) {
+    ctx.save(); ctx.fillStyle = `rgba(5,7,13,${.55 * f})`; ctx.fillRect(0, 700, W, 900);
+    glowLine(() => { ctx.beginPath(); ctx.moveTo(150, 1480); ctx.lineTo(lerp(150, 930, f), lerp(1480, 800, f)); }, K.coral, 14, 1);
+    ctx.translate(540, 1140); ctx.rotate(-.12); ctx.scale(lerp(1.6, 1, f), lerp(1.6, 1, f)); ctx.globalAlpha = f;
+    font(150); ctx.letterSpacing = '-4px'; ctx.lineWidth = 8; ctx.strokeStyle = K.bg0; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.strokeText('FALSO', 0, 0); ctx.fillStyle = K.coral; ctx.fillText('FALSO', 0, 0); ctx.restore();
+  }
+});
+// 2 · 1935 — doctors notice: cut nerve, no wrinkles
+scene(L(2), (t, lt) => {
+  backdrop(t, K.gold);
+  // year counter rolls back from 2026 to 1935
+  const yr = Math.round(lerp(2026, 1935, eio(inv(.1, 1.2, lt))));
+  ctx.save(); ctx.globalAlpha = eo(inv(0, .3, lt)); txt(String(yr), 540, 420, 170, K.gold, 800, 'center', 'JetBrains Mono', -4); ctx.restore();
+  tag('HACE ~90 AÑOS', 540, 560, K.gold, inv(.2, .5, lt), 26);
+  const cut = inv(WT('cortado'), WT('cortado') + .3, t), wr = eo(inv(WT('nervio'), WT('nervio') + 1.6, t));
+  const up = eo(inv(.2, .7, lt));
+  card(70, 680, 450, 900, up); card(560, 680, 450, 900, up);
+  ctx.save(); rr(70, 680, 450, 900, 56); ctx.clip(); finger(295, 800 + (1 - up) * 300, 250, wr, { t, nerve: inv(WT('nervio') - .2, WT('nervio') + .2, t) }); water(1120, t, .9, 70, 520); ctx.restore();
+  ctx.save(); rr(560, 680, 450, 900, 56); ctx.clip(); finger(785, 800 + (1 - up) * 300, 250, 0, { t, nerve: inv(WT('nervio') - .2, WT('nervio') + .2, t), cut }); water(1120, t, .9, 560, 1010); ctx.restore();
+  tag('CON NERVIO', 295, 1650, K.gold, inv(WT('nervio'), WT('nervio') + .3, t), 24);
+  tag('NERVIO CORTADO', 785, 1650, K.coral, inv(WT('cortado'), WT('cortado') + .3, t), 24);
+  const nk = inv(WT('arruga') - .1, WT('arruga') + .3, t);
+  if (nk > 0) { ctx.save(); ctx.globalAlpha = nk; txt('= SIN ARRUGAS', 785, 1750, 44, K.ink, 800); ctx.restore(); }
+});
+// 3 · not the water — your nervous system
+scene(L(3), (t, lt) => {
+  backdrop(t, K.gold);
+  const tw = WT('agua', 0, 3), ts = WT('sistema');
+  headline([['NO ES', K.ink], ['EL AGUA', K.aqua]], 540, 420, 120, .0, t, ts - .45);
+  // strike through "EL AGUA"
+  const sk = eo(inv(tw + .25, tw + .55, t)) * (1 - inv(ts - .45, ts - .2, t));
+  if (sk > 0) glowLine(() => { ctx.beginPath(); ctx.moveTo(240, 482); ctx.lineTo(lerp(240, 840, sk), 482); }, K.coral, 10, 1);
+  headline([['ES TU SISTEMA', K.ink], ['NERVIOSO', K.gold]], 540, 420, 110, ts - .1, t);
+  // body outline with a glowing nerve network down to the hand
+  const k = eo(inv(ts - .2, ts + .8, t)), z = 1 + lt * .02;
+  ctx.save(); ctx.translate(540, 1200); ctx.scale(z, z); ctx.translate(-540, -1200);
+  ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  circ(540, 760, 120); ctx.stroke(); rr(420, 900, 240, 520, 110); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(660, 960); ctx.quadraticCurveTo(820, 1050, 860, 1300); ctx.stroke();
+  brainGlyph(540, 755, .62, k);
+  const spine = () => { ctx.beginPath(); ctx.moveTo(540, 840); ctx.lineTo(540, 1380); };
+  const armN = () => { ctx.beginPath(); ctx.moveTo(540, 940); ctx.quadraticCurveTo(700, 960, 780, 1080); ctx.quadraticCurveTo(840, 1200, 860, 1330); };
+  glowLine(spine, K.gold, 4, .3 + .7 * k); glowLine(armN, K.gold, 4, .3 + .7 * k);
+  for (let i = 0; i < 4; i++) { const u = (t * .8 + i / 4) % 1; const px = u < .5 ? lerp(540, 780, u * 2) : lerp(780, 860, u * 2 - 1), py = u < .5 ? lerp(940, 1080, u * 2) : lerp(1080, 1330, u * 2 - 1); blob(px, py, 60, '255,209,102', .9 * k); }
+  ctx.save(); ctx.translate(860, 1330); ctx.scale(.28, .28); finger(0, 0, 300, k, { t }); ctx.restore();
+  ctx.restore();
+}, 'slide');
+// 4 · zoom into the fingertip: nerves close the blood vessels
+scene(L(4), (t, lt) => {
+  backdrop(t, K.coral);
+  const zin = eio(inv(0, .7, lt));
+  if (zin < 1) {
+    ctx.save(); const z = lerp(1, 9, eio(zin)); ctx.translate(540, 1000); ctx.scale(z, z); ctx.translate(-540, -1000); finger(540, 760, 520, 0, { t }); ctx.restore();
+    ctx.fillStyle = `rgba(12,19,34,${inv(.45, .7, lt)})`; ctx.fillRect(0, 0, W, H);
+  }
+  const ap = eo(inv(.55, .95, lt)); if (ap <= 0) return;
+  ctx.save(); ctx.globalAlpha = ap; ctx.translate(540, 1150); const s = lerp(.85, 1, ap); ctx.scale(s, s); ctx.translate(-540, -1150);
+  const vr = lerp(1, .38, eio(inv(WT('cierran'), WT('cierran') + 1.4, t)));
+  section(90, 700, 900, 900, t, { vr, nerve: 1, sig: inv(WT('nervios') - .2, WT('nervios') + .3, t) });
+  ctx.restore();
+  // stopwatch ring: "a few minutes"
+  const mk = inv(.6, 1, lt); if (mk > 0) {
+    ctx.save(); ctx.globalAlpha = mk; const p = eio(inv(WT('pocos'), WT('mojarte') + .6, t));
+    ctx.lineWidth = 12; ctx.strokeStyle = 'rgba(255,255,255,.12)'; circ(220, 470, 70); ctx.stroke();
+    ctx.strokeStyle = K.aqua; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(220, 470, 70, -Math.PI / 2, -Math.PI / 2 + TAU * p); ctx.stroke();
+    txt('MIN', 220, 472, 34, K.ink, 800, 'center', 'JetBrains Mono');
+    ctx.restore();
+  }
+  headline([['LOS VASOS', K.ink], ['SE CIERRAN', K.coral]], 640, 470, 84, WT('cierran') - .15, t);
+  tag('VASOS DE SANGRE', 540, 1680, K.coral, inv(WT('vasos'), WT('vasos') + .3, t), 26);
+});
+// 5 · the pad loses volume, the skin folds
+scene(L(5), (t, lt) => {
+  backdrop(t, K.coral);
+  const v = eio(inv(WT('volumen') - .3, WT('volumen') + 1.2, t)), f = Math.max(v * .55, eo(inv(WT('pliega') - .1, WT('pliega') + .5, t)));
+  section(90, 700, 900, 900, t, { vr: .38, fold: f, nerve: .5 });
+  // volume meter
+  ctx.save(); ctx.globalAlpha = eo(inv(0, .3, lt));
+  rr(140, 420, 360, 26, 13); ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.fill();
+  rr(140, 420, 360 * (1 - .35 * v), 26, 13); ctx.fillStyle = K.aqua; ctx.fill();
+  txt('VOLUMEN', 140, 380, 30, K.dim, 800, 'left', 'JetBrains Mono', 4); txt('↓', 520, 432, 54, K.aqua, 800, 'left');
+  ctx.restore();
+  tag('PIEL PEGADA ABAJO', 540, 1680, K.ink, inv(WT('pegada'), WT('pegada') + .3, t), 26);
+  headline([['SE PLIEGA', K.aqua]], 760, 560, 96, WT('pliega') - .1, t);
+}, 'slide');
+// 6 · the open loop: why?
+scene(L(6), (t, lt) => {
+  backdrop(t, K.aqua, 1.4);
+  const q = eo5(inv(WT('para') - .1, WT('para') + .45, t));
+  headline([['PERO…', K.dim]], 540, 600, 90, .0, t);
+  ctx.save(); ctx.translate(540, 1080); const s = lerp(.4, 1, back(clamp(q))); ctx.scale(s, s); ctx.globalAlpha = clamp(q * 1.5);
+  for (let i = 0; i < 3; i++) { ctx.strokeStyle = `rgba(63,224,255,${.25 - i * .07})`; ctx.lineWidth = 3; circ(0, 0, 230 + i * 70 + Math.sin(t * 3 + i) * 10); ctx.stroke(); }
+  font(380); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = K.aqua; ctx.shadowColor = K.aqua; ctx.shadowBlur = 60; ctx.fillText('?', 0, 20); ctx.restore();
+  headline([['¿PARA QUÉ?', K.ink]], 540, 1520, 120, WT('para') - .1, t);
+});
+// 7 · like a tyre tread: water out, better grip
+scene(L(7), (t, lt) => {
+  backdrop(t, K.aqua);
+  const fl = inv(WT('sacan') - .1, WT('sacan') + .3, t), up = eo(inv(0, .45, lt));
+  card(70, 560, 450, 1010, up); card(560, 560, 450, 1010, eo(inv(WT('llanta'), WT('llanta') + .4, t)));
+  ctx.save(); rr(70, 560, 450, 1010, 56); ctx.clip(); finger(295, 690 + (1 - up) * 300, 270, 1, { t });
+  if (fl > 0) for (let i = 0; i < 10; i++) { const u = (t * 1.1 + i * .13) % 1, sd = i % 2 ? 1 : -1, px = 295 + sd * u * 190, py = 800 + (i % 5) * 70 + u * 30; circ(px, py, 9); ctx.fillStyle = `rgba(63,224,255,${fl * (1 - u)})`; ctx.fill(); }
+  ctx.restore();
+  const tk = eo(inv(WT('llanta'), WT('llanta') + .45, t));
+  if (tk > 0) { ctx.save(); ctx.globalAlpha = tk; tread(620 + (1 - tk) * 200, 640, 330, 860, t, fl); ctx.restore(); }
+  tag('TU DEDO', 295, 500, K.aqua, inv(.2, .5, lt), 26);
+  tag('LLANTA', 785, 500, K.dim, inv(WT('llanta'), WT('llanta') + .3, t), 26);
+  headline([['MÁS AGARRE', K.green]], 540, 1700, 96, WT('agarras') - .1, t);
+});
+// 8 · the study: 12% faster with wet marbles
+scene(L(8), (t, lt) => {
+  backdrop(t, K.green);
+  tag('ESTUDIO · 2013', 540, 330, K.green, inv(0, .3, lt), 26);
+  // marbles moving between two dishes
+  const go = WT('canicas'), m = Math.min(6, Math.floor(clamp((t - go) / 2.2) * 6));
+  const dish = (cx, n) => { ctx.save(); ctx.beginPath(); ctx.ellipse(cx, 640, 190, 50, 0, 0, TAU); ctx.fillStyle = 'rgba(63,224,255,.12)'; ctx.fill(); ctx.strokeStyle = 'rgba(63,224,255,.6)'; ctx.lineWidth = 3; ctx.stroke(); for (let i = 0; i < n; i++) marble(cx - 110 + (i % 3) * 110, 630 - Math.floor(i / 3) * 34 + (i % 2) * 8, 26, ['#ff5d6c', '#3fe0ff', '#ffd166', '#43e5a0', '#b08cff', '#ff9f43'][i % 6]); ctx.restore(); };
+  dish(290, 6 - m); dish(790, m);
+  if (t > go && m < 6) { const u = ((t - go) / 2.2 * 6) % 1; marble(lerp(290, 790, eio(u)), 600 - Math.sin(u * Math.PI) * 160, 26, '#3fe0ff'); }
+  // bars: time to finish (smooth = 100, wrinkled = 88)
+  const p = eo(inv(WT('12') - .3, WT('12') + .8, t)), by = 900;
+  txt('TIEMPO', 140, by - 60, 28, K.dim, 800, 'left', 'JetBrains Mono', 4);
+  [['LISOS', 1, K.dim], ['ARRUGADOS', .88, K.green]].forEach(([n, v, c], i) => {
+    const y = by + i * 150, k = eo(inv(.3 + i * .25, 1.3 + i * .25, lt)); txt(n, 140, y, 34, K.ink, 800, 'left', 'Inter');
+    rr(140, y + 36, 800, 40, 20); ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fill(); rr(140, y + 36, 800 * v * k, 40, 20); ctx.fillStyle = c; ctx.fill();
+  });
+  const pc = Math.round(12 * p);
+  if (p > 0) { ctx.save(); ctx.globalAlpha = clamp(p * 2); txt(pc + '%', 540, 1360, 260, K.green, 800, 'center', 'Inter', -8); txt('MÁS RÁPIDO', 540, 1520, 48, K.ink, 800, 'center', 'JetBrains Mono', 8); ctx.restore(); }
+}, 'slide');
+// 9 · CTA: send it to your shower friend
+scene(L(9), (t, lt) => {
+  backdrop(t, K.aqua, 1.2);
+  // shower head + drops
+  ctx.save(); ctx.translate(540, 760); ctx.globalAlpha = eo(inv(0, .4, lt));
+  ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(260, -260); ctx.quadraticCurveTo(260, -330, 160, -330); ctx.lineTo(0, -330); ctx.lineTo(0, -230); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-150, -150); ctx.quadraticCurveTo(0, -270, 150, -150); ctx.closePath(); ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill();
+  const R = rng(5); for (let i = 0; i < 26; i++) { const x = -130 + R() * 260, sp = 500 + R() * 300, y = -140 + ((t * sp + R() * 900) % 700); ctx.strokeStyle = `rgba(63,224,255,${.8 - y / 900})`; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(x + (x * y / 900), y); ctx.lineTo(x + (x * (y + 26) / 900), y + 26); ctx.stroke(); }
+  ctx.restore();
+  // a clock showing "1 hora"
+  const ck = eo(inv(WT('hora') - .1, WT('hora') + .3, t));
+  if (ck > 0) { ctx.save(); ctx.globalAlpha = ck; ctx.translate(820, 980); ctx.scale(lerp(.6, 1, back(ck)), lerp(.6, 1, back(ck))); circ(0, 0, 90); ctx.fillStyle = 'rgba(10,14,24,.85)'; ctx.fill(); ctx.strokeStyle = K.aqua; ctx.lineWidth = 6; ctx.stroke(); const a = t * 6; ctx.strokeStyle = K.ink; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 62, Math.sin(a) * 62); ctx.moveTo(0, 0); ctx.lineTo(0, -40); ctx.stroke(); ctx.restore(); txt('1 HORA', 820, 1110, 34, K.aqua, 800, 'center', 'JetBrains Mono', 4); }
+  headline([['ENVÍASELO', K.aqua]], 540, 1260, 120, .0, t);
+  headline([['A ESE AMIGO QUE', K.ink], ['VIVE EN LA DUCHA', K.ink]], 540, 1440, 70, WT('amigo') - .1, t);
+  // share button press
+  const sp = inv(WT('ducha'), WT('ducha') + .3, t);
+  ctx.save(); ctx.globalAlpha = eo(inv(.2, .5, lt)); const bs = 1 - .08 * Math.sin(clamp(sp) * Math.PI);
+  ctx.translate(540, 1660); ctx.scale(bs, bs); rr(-200, -50, 400, 100, 50); ctx.fillStyle = sp >= 1 ? K.green : K.aqua; ctx.fill();
+  txt(sp >= 1 ? '✓ ENVIADO' : 'COMPARTIR', 0, 3, 38, K.bg0, 800, 'center', 'Inter', 2); ctx.restore();
+});
+
+// ---------- captions: 1-3 words at a time, big, the live word in accent ----------
+const KEYW = new Set(WORDS.filter(w => w.k).map(w => w.line + ':' + norm(w.w)));
+const CH = (() => { const out = []; let cur = [];
+  WORDS.forEach((w, i) => { cur.push(w); const nxt = WORDS[i + 1]; const brk = !nxt || nxt.line !== w.line || /[,.:?…!]$/.test(w.w) || cur.length >= 3 || (nxt && nxt.s - w.e > .25);
+    if (brk) { out.push({ ws: cur, s: cur[0].s, e: nxt ? Math.min(nxt.s, cur[cur.length - 1].e + .6) : cur[cur.length - 1].e + .8 }); cur = []; } });
+  return out; })();
+function captions(t) {
+  const c = CH.find(c => t >= c.s - .02 && t < c.e); if (!c) return;
+  const y = 1660, sz = 60; font(sz, 800); ctx.letterSpacing = '-1px';
+  const strs = c.ws.map(w => w.w.replace(/\*/g, '').toUpperCase()), sp = ctx.measureText(' ').width, ws = strs.map(s => ctx.measureText(s).width), tot = ws.reduce((a, b) => a + b, 0) + sp * (strs.length - 1);
+  let x = 540 - tot / 2; const pop = back(clamp((t - c.s) / .18));
+  ctx.save(); ctx.translate(540, y); ctx.scale(lerp(.85, 1, pop), lerp(.85, 1, pop)); ctx.translate(-540, -y);
+  rr(540 - tot / 2 - 34, y - sz * .82, tot + 68, sz * 1.64, 26); ctx.fillStyle = 'rgba(5,7,13,.62)'; ctx.fill();
+  c.ws.forEach((w, i) => { const live = t >= w.s && (i === c.ws.length - 1 || t < c.ws[i + 1].s), said = t >= w.s, key = w.k;
+    ctx.fillStyle = key ? K.aqua : live ? K.ink : said ? 'rgba(244,246,251,.92)' : 'rgba(244,246,251,.35)'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(strs[i], x, y + 2); x += ws[i] + sp; });
+  ctx.restore(); ctx.letterSpacing = '0px';
+}
+
+// ---------- compositor: transitions between scenes ----------
+const TRD = .42;
+// scenes are drawn a bit smaller around the upper middle so nothing sits under the app buttons/description (safe zone)
+function drawScene(i, t) { ctx.save(); ctx.translate(540, 700); ctx.scale(.84, .84); ctx.translate(-540, -700); S[i].fn(t, t - S[i].t0); ctx.restore(); }
+function renderAt(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  let i = 0; while (i + 1 < S.length && t >= S[i + 1].t0) i++;
+  const lt = t - S[i].t0;
+  if (i > 0 && lt < TRD) {
+    const k = eio(lt / TRD);
+    drawScene(i - 1, t);
+    ctx.save();
+    if (S[i].tr === 'slide') { ctx.beginPath(); ctx.rect(0, H * (1 - k), W, H * k + 2); ctx.clip(); ctx.translate(0, (1 - k) * 260); }
+    else { ctx.beginPath(); ctx.arc(540, 1000, k * 1300, 0, TAU); ctx.clip(); }
+    drawScene(i, t); ctx.restore();
+    // accent edge
+    ctx.save(); ctx.globalAlpha = Math.sin(k * Math.PI) * .9; ctx.strokeStyle = K.aqua; ctx.lineWidth = 6;
+    if (S[i].tr === 'slide') { ctx.beginPath(); ctx.moveTo(0, H * (1 - k)); ctx.lineTo(W, H * (1 - k)); ctx.stroke(); } else { circ(540, 1000, k * 1300); ctx.stroke(); }
+    ctx.restore();
+  } else drawScene(i, t);
+  vignette();
+  captions(t);
+  // loop: the last frames fade back to the first
+  const lf = inv(DUR - .45, DUR, t); if (lf > 0) { ctx.save(); ctx.globalAlpha = lf; ctx.fillStyle = K.bg0; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+}
+window.DUR = DUR; window.FPS = FPS;
+window.seek = s => renderAt(clamp(Number(s) || 0, 0, DUR));
+window.grab = (q = .92) => cv.toDataURL('image/jpeg', q);
+// preview in a browser: plays in real time; ?t=12 freezes a frame
+const qt = new URLSearchParams(location.search).get('t');
+document.fonts.ready.then(() => {
+  if (qt != null) { window.seek(+qt); return; }
+  if (navigator.webdriver) { window.seek(0); return; }
+  const t0 = performance.now(); (function loop() { window.seek(((performance.now() - t0) / 1000) % DUR); requestAnimationFrame(loop); })();
+});
+</script></body></html>
