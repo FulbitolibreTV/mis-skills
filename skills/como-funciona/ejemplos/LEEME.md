@@ -12,6 +12,7 @@ Cada carpeta es un vídeo terminado y publicado. Trae `script.json` (la voz), `s
 | `afeitarte` | Mito (cuerpo humano) | piel en macro, pelo, cuchilla, barbilla |
 | `pie` | Cuerpo humano | cerebro, pierna, nervio, alfileres |
 | `verguenza` | Cuerpo humano (cerebro) | cerebro, persona, micrófono, escáner; estudio con universidad y año |
+| `dedos` | Cuerpo humano (piel) | dedo gigante que se arruga en el agua, corte de la yema con vasos que se cierran, cerebro con nervio, dibujo de llanta, canicas y cuenco, cronómetro; portada sin repetir el `hookTitle` |
 | `chamba` | Humor «Día 1 vs Día 30» | despertador, cama, nevera, dinero; el mismo personaje y `pill('DÍA 1')` |
 | `insumergible` | Historia / relato | transatlántico, buque de guerra, iceberg, bote, mina, hélice, bajo el agua, la protagonista |
 | `yamaguchi` | Historia / relato | pueblo, explosión, tren, oficina, ingeniero |
