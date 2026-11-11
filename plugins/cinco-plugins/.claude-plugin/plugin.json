@@ -1,0 +1,19 @@
+{
+  "name": "cinco-plugins",
+  "version": "1.0.0",
+  "description": "Asistente de instalación para Claude Code: Playwright, OmniRoute, Headroom, MemPalace y Frontend Design. Usa las fuentes oficiales y pide consentimiento en cada paso.",
+  "author": {
+    "name": "FulbitolibreTV"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "playwright",
+    "omniroute",
+    "headroom",
+    "mempalace",
+    "frontend-design",
+    "instalador",
+    "espanol"
+  ]
+}

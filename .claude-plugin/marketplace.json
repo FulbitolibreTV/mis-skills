@@ -26,7 +26,7 @@
       "name": "skills-video",
       "source": "./",
       "strict": false,
-      "description": "Once skills para vídeos, reels, anuncios y YouTube Agent; edición, guiones, miniaturas, retención y más.",
+      "description": "Skills para videos, reels, anuncios, YouTube Agent y animaciones con codigo inspiradas en referencias de creadores.",
       "skills": [
         "./skills/como-funciona",
         "./skills/como-funciona-personajes",
@@ -38,8 +38,14 @@
         "./skills/mascota-pixel",
         "./skills/anuncio-animado",
         "./skills/becario-editor",
-        "./skills/youtube-agent"
+        "./skills/youtube-agent",
+        "./skills/opus-video-inspiracion"
       ]
+    },
+    {
+      "name": "cinco-plugins",
+      "source": "./plugins/cinco-plugins",
+      "description": "Guía de instalación y comprobación de Playwright, OmniRoute, Headroom, MemPalace y Frontend Design para Claude Code."
     }
   ]
 }

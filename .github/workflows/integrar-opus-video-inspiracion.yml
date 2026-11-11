@@ -1,0 +1,97 @@
+name: Integrar Opus Video Inspiracion
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/integrar-opus-video-inspiracion.yml"
+      - "integracion-opus-video-inspiracion.zip"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extraer skill y actualizar marketplace
+        run: |
+          python3 - <<'PYBOOT'
+          import json
+          from pathlib import Path, PurePosixPath
+          from zipfile import ZipFile
+
+          archive=Path('integracion-opus-video-inspiracion.zip')
+          if not archive.is_file():
+              raise SystemExit('Falta integracion-opus-video-inspiracion.zip en la raiz')
+          with ZipFile(archive) as z:
+              if z.testzip():
+                  raise SystemExit('ZIP danado')
+              manifest=json.loads(z.read('manifest.json').decode('utf-8'))
+              if manifest.get('id')!='opus-video-inspiracion':
+                  raise SystemExit('Identidad de skill invalida')
+              files=[]
+              for info in z.infolist():
+                  name=info.filename
+                  q=PurePosixPath(name)
+                  if q.is_absolute() or '..' in q.parts or '\\' in name or info.file_size>300000:
+                      raise SystemExit('Entrada insegura o demasiado grande')
+                  if info.is_dir():
+                      continue
+                  if (name.startswith('skills/opus-video-inspiracion/') or
+                      name == 'zips/opus-video-inspiracion-v1.0.0.zip'):
+                      files.append((name,z.read(info)))
+              for need in ('skills/opus-video-inspiracion/SKILL.md',
+                           'skills/opus-video-inspiracion/GUIA.md',
+                           'zips/opus-video-inspiracion-v1.0.0.zip'):
+                  if need not in dict(files):
+                      raise SystemExit('No se encontro: '+need)
+              for name,raw in files:
+                  dest=Path(name)
+                  dest.parent.mkdir(parents=True,exist_ok=True)
+                  dest.write_bytes(raw)
+              snippet=z.read('README-SNIPPET.md').decode('utf-8')
+
+          mk=Path('.claude-plugin/marketplace.json')
+          catalog=json.loads(mk.read_text(encoding='utf-8'))
+          plugins=[p for p in catalog['plugins'] if p.get('name')=='skills-video']
+          if len(plugins)!=1:
+              raise SystemExit('No existe un plugin unico skills-video')
+          entry=plugins[0]
+          skill_path='./skills/opus-video-inspiracion'
+          entry.setdefault('skills',[])
+          if skill_path not in entry['skills']:
+              entry['skills'].append(skill_path)
+          entry['description']='Skills para videos, reels, anuncios, YouTube Agent y animaciones con codigo inspiradas en referencias de creadores.'
+          mk.write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          readme=Path('README.md')
+          content=readme.read_text(encoding='utf-8')
+          if '## Opus Video Inspiración — animaciones con código' not in content:
+              readme.write_text(content.rstrip()+'\n'+snippet,encoding='utf-8')
+          print('Skill y marketplace actualizados')
+          PYBOOT
+      - name: Verificar contenido y pruebas
+        run: |
+          python3 -m unittest discover -s skills/opus-video-inspiracion/tests -v
+          python3 - <<'PYTEST'
+          import json
+          from pathlib import Path
+          from zipfile import ZipFile
+          j=json.loads(Path('.claude-plugin/marketplace.json').read_text(encoding='utf-8'))
+          p=next(p for p in j['plugins'] if p['name']=='skills-video')
+          assert p['skills'].count('./skills/opus-video-inspiracion')==1
+          with ZipFile('zips/opus-video-inspiracion-v1.0.0.zip') as z:
+              assert z.testzip() is None
+              assert 'opus-video-inspiracion/SKILL.md' in z.namelist()
+          assert Path('README.md').read_text(encoding='utf-8').count('## Opus Video Inspiración — animaciones con código')==1
+          print('Integracion verificada: OK')
+          PYTEST
+      - name: Guardar cambios de integracion
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md .claude-plugin/marketplace.json skills/opus-video-inspiracion zips/opus-video-inspiracion-v1.0.0.zip
+          git diff --cached --quiet || (git commit -m "Integrar Opus Video Inspiracion" && git push)

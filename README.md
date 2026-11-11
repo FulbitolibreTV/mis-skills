@@ -147,3 +147,28 @@ Tres mods para que te dure más el límite de uso de Claude Code (requiere Claud
 ---
 
 Hecho por mí. ¡Sígueme en [Instagram](https://www.instagram.com/jossports10), [YouTube](https://www.youtube.com/@Factscuriosos19) y [Facebook](https://www.facebook.com/share/1CUAbp5cRo/)!
+
+## Cinco plugins de Claude Code (guía @noisy.ia)
+
+El plugin **`cinco-plugins`** orienta y comprueba la instalación de **Playwright**, **OmniRoute**, **Headroom**, **MemPalace** y **Frontend Design**, siguiendo la guía de @noisy.ia. No incorpora ni ejecuta automáticamente los programas externos: cada herramienta se instala desde su repositorio o marketplace oficial, con permiso del usuario.
+
+```text
+/plugin marketplace add FulbitolibreTV/mis-skills
+/plugin install cinco-plugins --marketplace FulbitolibreTV/mis-skills
+```
+
+Después, en Claude Code: `/cinco-plugins:instalar-cinco-plugins`. Para solo revisar: `/cinco-plugins:instalar-cinco-plugins comprobar`. La guía está en [`plugins/cinco-plugins/GUIA.md`](plugins/cinco-plugins/GUIA.md).
+
+**No confundir con `becario-kit`**: este último conserva MODS como quinto componente. Este conjunto incluye OmniRoute, tal como figura en el PDF de referencia.
+
+## Opus Video Inspiración — animaciones con código
+
+Nueva skill `opus-video-inspiracion` para estudiar técnicas de motion graphics, explainers, escenas 3D y animaciones interactivas y producir **videos originales** en HTML/Canvas/SVG/Three.js. Referencias: [awesome-opus5-5-videos](https://github.com/yihui-dev/awesome-opus5-5-videos) de yihui-dev. Se enlazan ejemplos de sus creadores sin redistribuir videos ni copiar sus prompts.
+
+- Fuente: [`skills/opus-video-inspiracion/`](skills/opus-video-inspiracion/)
+- ZIP para Claude: [`zips/opus-video-inspiracion-v1.0.0.zip`](zips/opus-video-inspiracion-v1.0.0.zip)
+- Para Claude Code: la skill se incluye dentro del plugin `skills-video` del marketplace de este repositorio.
+
+Ejemplo: «Crea un Reel de 30 segundos sobre cómo funciona una turbina, estilo técnico 9:16, con referencias de opus-video-inspiracion. Quiero HTML animado y MP4 solo si puedes verificar su exportación».
+
+El catálogo enlazado tiene licencia MIT para el proyecto, pero cada video y prompt pertenece al creador indicado en sus páginas; las obras, música y activos de terceros requieren sus propios permisos.
